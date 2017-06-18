@@ -114,31 +114,9 @@ namespace chorusgui
 
         ChorusDeviceClass[] ChorusDevices;
 
-        void LoadSettings()
-        {
-            XmlSerializer serializer = new XmlSerializer(typeof(Settings));
-            try
-            {
-                using (FileStream stream = new FileStream("settings.xml", FileMode.Open))
-                {
-                    settings = (Settings)serializer.Deserialize(stream);
-                }
-            }
-            catch (FileNotFoundException) {
-                settings.SerialBaudIndex = 2;
-                settings.MinimalLapTime = 5;
-                settings.QualificationRaces = 1;
-                settings.TimeToPrepare = 5;
-            }
-            DeviceCount = 0;
-            readbuffer = "";
-            contender_slider1.Value = settings.NumberOfContendersForQualification;
-            contender_slider2.Value = settings.NumberOfContendersForRace;
-            MinimalLapTimeLabel.Content = settings.MinimalLapTime + " seconds";
-            TimeToPrepareLabel.Content = settings.TimeToPrepare + " seconds";
-            IsRaceActive = false;
-        }
+        #region WINDOW
 
+        //CLASS INIT
         public ChorusGUI()
         {
             InitializeComponent();
@@ -174,6 +152,7 @@ namespace chorusgui
                 cbSpeechVoice.SelectedIndex = 0;
         }
 
+        //WINDOW CLOSING
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             XmlSerializer serializer = new XmlSerializer(typeof(PilotCollection));
@@ -188,6 +167,7 @@ namespace chorusgui
             }
         }
 
+        //WINDOW LOADED
         void Window_Loaded(object sender, RoutedEventArgs e)
         {
             mySerialPort = new SerialPort(settings.SerialPortName, settings.SerialBaud, 0, 8, StopBits.One);
@@ -195,25 +175,18 @@ namespace chorusgui
             mySerialPort.Open();
             SendData("N0");
         }
-
-        private void textBox_OnKeyDownHandler(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Return)
-            {
-                SendData(textBox.Text);
-                textBox.Text = "";
-            }
-        }
+        #endregion
 
         #region Recieving
-
         private delegate void UpdateUiTextDelegate(string text);
+        //DATA RECEIVING
         private void DataReceivedHandler(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
         {
             string recieved_data = mySerialPort.ReadExisting();
             Dispatcher.Invoke(DispatcherPriority.Send, new UpdateUiTextDelegate(ReadData), recieved_data);
         }
 
+        //DATA SENDING
         private void SendData(string outdata)
         {
             mySerialPort.Write(outdata + "\n");
@@ -221,129 +194,7 @@ namespace chorusgui
             //TODO AUTOSCROLL???
         }
 
-        private void OnTimedEvent(object source, ElapsedEventArgs e)
-        {
-            Dispatcher.Invoke(DispatcherPriority.Send, new UpdateUiTextDelegate(SendData), "R*i");
-            aTimer.Stop();
-        }
-        
-        private void btn_MinimalLapTime(object sender, RoutedEventArgs e)
-        {
-            Button button = (Button)sender;
-            if (button.Name[0] == 'D')
-            {
-                if (settings.MinimalLapTime > 0)
-                    settings.MinimalLapTime--;
-            }
-            else if (button.Name[0] == 'I')
-            {
-                if (settings.MinimalLapTime < 250)
-                    settings.MinimalLapTime++;
-            }
-            SendData("R*L"+ settings.MinimalLapTime.ToString("X2"));
-            MinimalLapTimeLabel.Content = settings.MinimalLapTime + " seconds";
-        }
-
-        private void btn_QualificationRuns(object sender, RoutedEventArgs e)
-        {
-            Button button = (Button)sender;
-            if (button.Name[0] == 'D')
-            {
-                if (settings.QualificationRaces > 1)
-                    settings.QualificationRaces--;
-            }
-            else if (button.Name[0] == 'I')
-            {
-                if (settings.QualificationRaces < 10)
-                    settings.QualificationRaces++;
-            }
-            QualificationRunsLabel.Content = settings.QualificationRaces;
-        }
-
-        private void btn_TimeToPrepare(object sender, RoutedEventArgs e)
-        {
-            Button button = (Button)sender;
-            if (button.Name[0] == 'D')
-            {
-                if (settings.TimeToPrepare > 0)
-                    settings.TimeToPrepare--;
-            }
-            else if (button.Name[0] == 'I')
-            {
-                if (settings.TimeToPrepare < 120)
-                    settings.TimeToPrepare++;
-            }
-            TimeToPrepareLabel.Content = settings.TimeToPrepare + " seconds";
-        }
-
-        private void device_btnClick(object sender, RoutedEventArgs e)
-        {
-            Button button = (Button)sender;
-            var device = button.Name[2] - '0';
-            switch (button.Name[3])
-            {
-                case 'T':
-                    if (button.Name[4] == 'i')
-                    {
-                        SendData("R" + device + "T");
-                    }
-                    else if (button.Name[4] == 'd')
-                    {
-                        SendData("R" + device + "t");
-                    }
-                    else if (button.Name[4] == 's')
-                    {
-                        SendData("R" + device + "S");
-                    }
-                    break;
-                case 'Y':
-                    if (button.Name[4] == 'i')
-                    {
-                        ChorusDevices[device].BatteryVoltageAdjustment++;
-                        SendData("R" + device + "Y");
-                    }
-                    else if (button.Name[4] == 'd')
-                    {
-                        ChorusDevices[device].BatteryVoltageAdjustment--; 
-                        SendData("R" + device + "Y");
-                    }
-                    break;
-            }
-        }
-
-        private void device_cbClicked(object sender, RoutedEventArgs e)
-        {
-            CheckBox checkbox = (CheckBox)sender;
-            var device = checkbox.Name[2] - '0';
-            switch (checkbox.Name[3])
-            {
-                case 'D':
-                    SendData("R" + device + "D");
-                    break;
-                case 'V':
-                    if (checkbox.IsChecked.Value)
-                        SendData("R" + device + "V");
-                    else
-                        SendData("R" + device + "v");
-                    break;
-            }
-        }
-
-        private void device_cbSelChange(object sender, SelectionChangedEventArgs e)
-        {
-            ComboBox combobox = (ComboBox)sender;
-            var device = combobox.Name[2] - '0';
-            switch (combobox.Name[3])
-            {
-                case 'B':
-                    SendData("R" + device + "N" + combobox.SelectedIndex);
-                    break;
-                case 'C':
-                    SendData("R" + device + "H" + combobox.SelectedIndex);
-                    break;
-            }
-        }
-
+        //MAIN PARSER
         private void ReadData(string indata)
         {
             for (int i = 0; i < indata.Length; i++)
@@ -356,7 +207,7 @@ namespace chorusgui
                     //TODO AUTOSCROLL???
                     switch (readbuffer[0])
                     {
-                        case 'N':
+                        case 'N': //ENUMERATE DEVICES
                             //TODO VERIFY SETTINGS!!!
                             //TODO: VoltageMonitoring
                             if (readbuffer.Length < 2)
@@ -726,22 +577,129 @@ namespace chorusgui
                 }
             }
         }
+        
+        //GET VOLTAGE MONITOR VALUE
+        private void SendVoltageMonitorRequest(string outdata)
+        {
+            if (!IsRaceActive)
+            {
+                SendData("R" + cbVoltageMonitoring.SelectedIndex + "Y");
+            }
+        }
+
+        //CALIBRATION TIMER
+        private void OnTimedEvent(object source, ElapsedEventArgs e)
+        {
+            Dispatcher.Invoke(DispatcherPriority.Send, new UpdateUiTextDelegate(SendData), "R*i");
+            aTimer.Stop();
+        }
 
         #endregion
 
-        private void contender_slider1_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        #region Settings
+        //LOAD SETTINGS
+        void LoadSettings()
         {
-            if (contenders1 != null)
-                contenders1.Text = e.NewValue.ToString();
-            settings.NumberOfContendersForQualification = Convert.ToInt32(e.NewValue);
+            XmlSerializer serializer = new XmlSerializer(typeof(Settings));
+            try
+            {
+                using (FileStream stream = new FileStream("settings.xml", FileMode.Open))
+                {
+                    settings = (Settings)serializer.Deserialize(stream);
+                }
+            }
+            catch (FileNotFoundException)
+            {
+                settings.SerialBaudIndex = 2;
+                settings.MinimalLapTime = 5;
+                settings.QualificationRaces = 1;
+                settings.TimeToPrepare = 5;
+            }
+            DeviceCount = 0;
+            readbuffer = "";
+            contender_slider1.Value = settings.NumberOfContendersForQualification;
+            contender_slider2.Value = settings.NumberOfContendersForRace;
+            MinimalLapTimeLabel.Content = settings.MinimalLapTime + " seconds";
+            TimeToPrepareLabel.Content = settings.TimeToPrepare + " seconds";
+            IsRaceActive = false;
         }
-        private void contender_slider2_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        
+        private void Settings_TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (contenders2 != null)
-                contenders2.Text = e.NewValue.ToString();
-            settings.NumberOfContendersForRace = Convert.ToInt32(e.NewValue);
+            TabControl tabcontrol = (TabControl)sender;
+            if ((tabcontrol.SelectedIndex - 2) >= 0)
+            {
+                if (!IsRaceActive)
+                    SendData("R" + (tabcontrol.SelectedIndex - 2) + "Y");
+            }
+        }
+        
+        #region Settings_Race
+        //RACEMODE
+        void RaceMode_Checked(object sender, RoutedEventArgs e)
+        {
+            settings.RaceMode = cbRaceMode1.IsChecked.Value;
+        }
+        void txtRaceMode_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            int value;
+            try
+            {
+                value = Convert.ToInt32(txtRaceMode.Text);
+            }
+            catch (FormatException)
+            {
+                value = 0;
+            }
+            if (value < 1)
+            {
+                value = 1;
+                txtRaceMode.Text = "1";
+            }
+            if (value > 1000)
+            {
+                value = 1000;
+                txtRaceMode.Text = "1000";
+            }
+            settings.NumberofTime = value;
         }
 
+        //MINIMAL LAP TIME
+        private void btn_MinimalLapTime(object sender, RoutedEventArgs e)
+        {
+            Button button = (Button)sender;
+            if (button.Name[0] == 'D')
+            {
+                if (settings.MinimalLapTime > 0)
+                    settings.MinimalLapTime--;
+            }
+            else if (button.Name[0] == 'I')
+            {
+                if (settings.MinimalLapTime < 250)
+                    settings.MinimalLapTime++;
+            }
+            SendData("R*L" + settings.MinimalLapTime.ToString("X2"));
+            MinimalLapTimeLabel.Content = settings.MinimalLapTime + " seconds";
+        }
+
+        //TIME TO PREPARE
+        private void btn_TimeToPrepare(object sender, RoutedEventArgs e)
+        {
+            Button button = (Button)sender;
+            if (button.Name[0] == 'D')
+            {
+                if (settings.TimeToPrepare > 0)
+                    settings.TimeToPrepare--;
+            }
+            else if (button.Name[0] == 'I')
+            {
+                if (settings.TimeToPrepare < 120)
+                    settings.TimeToPrepare++;
+            }
+            TimeToPrepareLabel.Content = settings.TimeToPrepare + " seconds";
+        }
+
+        //SKIP FIRST LAP
         private void SkipFirstLap_CLick(object sender, RoutedEventArgs e)
         {
             settings.SkipFirstLap = cbSkipFirstLap.IsChecked.Value;
@@ -755,10 +713,46 @@ namespace chorusgui
             }
         }
 
+        //USE DOUBLE OUT
         private void DoubleOut_Click(object sender, RoutedEventArgs e)
         {
             settings.DoubleOut = cbDoubleOut.IsChecked.Value;
         }
+
+        //NUMBER OF CONTENDERS FOR QUALIFICATION RUNS
+        private void contender_slider1_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (contenders1 != null)
+                contenders1.Text = e.NewValue.ToString();
+            settings.NumberOfContendersForQualification = Convert.ToInt32(e.NewValue);
+        }
+
+        //NUMBER OF QUALIFICATION RUNS
+        private void btn_QualificationRuns(object sender, RoutedEventArgs e)
+        {
+            Button button = (Button)sender;
+            if (button.Name[0] == 'D')
+            {
+                if (settings.QualificationRaces > 1)
+                    settings.QualificationRaces--;
+            }
+            else if (button.Name[0] == 'I')
+            {
+                if (settings.QualificationRaces < 10)
+                    settings.QualificationRaces++;
+            }
+            QualificationRunsLabel.Content = settings.QualificationRaces;
+        }
+
+        //NUMBER OF CONTENDERS FOR ELEMINATION RUNS
+        private void contender_slider2_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (contenders2 != null)
+                contenders2.Text = e.NewValue.ToString();
+            settings.NumberOfContendersForRace = Convert.ToInt32(e.NewValue);
+        }
+
+        //ENABLE VOLTAGE MONITORING
         private void cbVoltageMonitoring_SelChange(object sender, SelectionChangedEventArgs e)
         {
             settings.VoltageMonitorDevice = cbVoltageMonitoring.SelectedIndex;
@@ -783,31 +777,110 @@ namespace chorusgui
             }
         }
 
-        private void SendVoltageMonitorRequest(string outdata)
-        {
-            if (!IsRaceActive)
-            {
-                SendData("R" + cbVoltageMonitoring.SelectedIndex + "Y");
-            }
-        }
-
         private void VoltageMonitorTimerEvent(object source, ElapsedEventArgs e)
         {
             if (!IsRaceActive)
                 Dispatcher.Invoke(DispatcherPriority.Send, new UpdateUiTextDelegate(SendVoltageMonitorRequest), "");
         }
+        #endregion
 
-        private void Settings_TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        #region Settings_Speech
+
+        private void cbSpeechVoice_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            TabControl tabcontrol = (TabControl)sender;
-            if ((tabcontrol.SelectedIndex - 2) >= 0)
+            synthesizer.SelectVoice(cbSpeechVoice.SelectedItem.ToString());
+            settings.Voice = cbSpeechVoice.SelectedItem.ToString();
+            if (window.Visibility == Visibility.Visible)
             {
-                if (!IsRaceActive)
-                    SendData("R" + (tabcontrol.SelectedIndex - 2) + "Y");
+                synthesizer.SpeakAsync("Hello. " + cbSpeechVoice.SelectedItem + "selected. Im happy to assist you.");
+            }
+        }
+        #endregion
+
+        #region Settings_Devices
+        private void device_btnClick(object sender, RoutedEventArgs e)
+        {
+            Button button = (Button)sender;
+            var device = button.Name[2] - '0';
+            switch (button.Name[3])
+            {
+                case 'T':
+                    if (button.Name[4] == 'i')
+                    {
+                        SendData("R" + device + "T");
+                    }
+                    else if (button.Name[4] == 'd')
+                    {
+                        SendData("R" + device + "t");
+                    }
+                    else if (button.Name[4] == 's')
+                    {
+                        SendData("R" + device + "S");
+                    }
+                    break;
+                case 'Y':
+                    if (button.Name[4] == 'i')
+                    {
+                        ChorusDevices[device].BatteryVoltageAdjustment++;
+                        SendData("R" + device + "Y");
+                    }
+                    else if (button.Name[4] == 'd')
+                    {
+                        ChorusDevices[device].BatteryVoltageAdjustment--;
+                        SendData("R" + device + "Y");
+                    }
+                    break;
             }
         }
 
+        private void device_cbClicked(object sender, RoutedEventArgs e)
+        {
+            CheckBox checkbox = (CheckBox)sender;
+            var device = checkbox.Name[2] - '0';
+            switch (checkbox.Name[3])
+            {
+                case 'D':
+                    SendData("R" + device + "D");
+                    break;
+                case 'V':
+                    if (checkbox.IsChecked.Value)
+                        SendData("R" + device + "V");
+                    else
+                        SendData("R" + device + "v");
+                    break;
+            }
+        }
 
+        private void device_cbSelChange(object sender, SelectionChangedEventArgs e)
+        {
+            ComboBox combobox = (ComboBox)sender;
+            var device = combobox.Name[2] - '0';
+            switch (combobox.Name[3])
+            {
+                case 'B':
+                    SendData("R" + device + "N" + combobox.SelectedIndex);
+                    break;
+                case 'C':
+                    SendData("R" + device + "H" + combobox.SelectedIndex);
+                    break;
+            }
+        }
+        #endregion
+
+        #region Settings_Debug
+        private void textBox_OnKeyDownHandler(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Return)
+            {
+                SendData(textBox.Text);
+                textBox.Text = "";
+            }
+        }
+        #endregion
+
+        #endregion
+
+        #region Raceing
         private void button_Click(object sender, RoutedEventArgs e)
         {
             //TODO
@@ -845,43 +918,7 @@ namespace chorusgui
             //TODO
         }
 
-        void RaceMode_Checked(object sender, RoutedEventArgs e)
-        {
-            settings.RaceMode = cbRaceMode1.IsChecked.Value;
-        }
+        #endregion
 
-        void txtRaceMode_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            int value;
-            try
-            {
-                value = Convert.ToInt32(txtRaceMode.Text);
-            }
-            catch (FormatException)
-            {
-                value = 0;
-            }
-            if (value < 1)
-            {
-                value = 1;
-                txtRaceMode.Text = "1";
-            }
-            if (value>1000)
-            {
-                value = 1000;
-                txtRaceMode.Text = "1000";
-            }
-            settings.NumberofTime = value;
-        }
-
-        private void cbSpeechVoice_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            synthesizer.SelectVoice(cbSpeechVoice.SelectedItem.ToString());
-            settings.Voice = cbSpeechVoice.SelectedItem.ToString();
-            if (window.Visibility == Visibility.Visible)
-            {
-                synthesizer.SpeakAsync("Hello. " + cbSpeechVoice.SelectedItem + "selected. Im happy to assist you.");
-            }
-        }
     }
 }
