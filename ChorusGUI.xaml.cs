@@ -1,5 +1,13 @@
-﻿//TODO: search for TODO
+﻿/*
+Renn management:
+Beim Starten des Races,sollte ein Countdown runterlaufen und ein Startsignal ausgeben (Irgendeinen Sound)
+Am ersten Gate wird dann der Countdown gestartet. So machen wir es immer, dass wir als erstes durch das Startgate fliegen
+und bei jeder Runde sollte Ein Sound ertönen. 
+Wenn jemand seine Runden X (sagen wir 4  Runden) voll hat, sollte ein Soundfile abgespielt werden "Pilot 1 finish" oderso
+Gibt es keine Sprachbibliothek um auch den Nickname ansagen zu lassen?
+*/
 
+//TODO: search for TODO
 using System;
 using System.Collections.Generic;
 using System.IO.Ports;
@@ -154,7 +162,6 @@ namespace chorusgui
             catch (FileNotFoundException) { }
             synthesizer = new SpeechSynthesizer();
             var voices = synthesizer.GetInstalledVoices();
-            //TODO SOUND STUFF
             foreach (var voice in voices)
             {
                 cbSpeechVoice.Items.Add(voice.VoiceInfo.Name);
