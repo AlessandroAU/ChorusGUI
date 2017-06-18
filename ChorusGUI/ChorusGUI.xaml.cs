@@ -21,6 +21,8 @@ using System.Timers;
 using System.Xml.Serialization;
 using System.IO;
 using System.Speech.Synthesis;
+using System.Collections.Specialized;
+using System.ComponentModel;
 
 namespace chorusgui
 {
@@ -74,6 +76,40 @@ namespace chorusgui
     }
 
     [Serializable]
+    public class Race
+    {
+        public int[] Lap { get; set; }
+        public Pilot Pilot { get; set; }
+        public ChorusDeviceClass Device { get; set; }
+        public string RFChannel
+        {
+            get
+            {
+                return Device.Band.Text + " " + Device.Channel.Text;
+            }
+            set
+            {
+            }
+        }
+        public string Seconds { get; set; }
+        public string Laps { get; set; }
+        public string BestLap { get; set; }
+        public string Heat { get; set; }
+        public string Result
+        {
+            get
+            {
+                if (Laps != null)
+                    return "Laps: " + Laps + " seconds: " + Seconds;
+                else if (Seconds != null)
+                    return "Seconds: "+ Seconds;
+                return null;
+            }
+            set { }
+        }
+    }
+
+    [Serializable]
     public class Settings
     {
         public int SerialBaud { get; set; }
@@ -97,6 +133,20 @@ namespace chorusgui
     public class PilotCollection : ObservableCollection<Pilot>
     {
     }
+    [Serializable]
+    public class RaceCollection : ObservableCollection<Race>
+    {
+    }
+
+    [Serializable]
+    public class QualificationCollection : ObservableCollection<Race>
+    {
+    }
+
+    [Serializable]
+    public class HeatCollection : ObservableCollection<Race>
+    {
+    }
 
     public partial class ChorusGUI : Window
     {
@@ -108,8 +158,12 @@ namespace chorusgui
         int DeviceCount;
         Boolean IsRaceActive;
         private SpeechSynthesizer synthesizer;
+        Boolean QualificationNeedsUpdate;
 
         private PilotCollection Pilots;
+        private RaceCollection Races;
+        private QualificationCollection Qualifications;
+        private HeatCollection Heat;
         public Settings settings = new Settings();
 
         ChorusDeviceClass[] ChorusDevices;
@@ -125,7 +179,13 @@ namespace chorusgui
             aTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
             VoltageMonitorTimer.Elapsed += new ElapsedEventHandler(VoltageMonitorTimerEvent);
             QualificationRunsLabel.Content = settings.QualificationRaces;
+            Heat = (HeatCollection)Resources["HeatCollection"];
+            Qualifications = (QualificationCollection)Resources["QualificationCollection"];
+            Races = (RaceCollection)Resources["RaceCollection"];
             Pilots = (PilotCollection)Resources["PilotCollection"];
+            //TODO load QualificationCollection
+            //TODO load RaceCollection
+            //TODO load HeatCollection
             XmlSerializer serializer = new XmlSerializer(typeof(PilotCollection));
             try {
                 using (FileStream stream = new FileStream("pilots.xml", FileMode.Open))
@@ -150,6 +210,22 @@ namespace chorusgui
             }
             if (cbSpeechVoice.SelectedItem == null)
                 cbSpeechVoice.SelectedIndex = 0;
+            Pilots.CollectionChanged += Pilots_CollectionChanged;
+        }
+        private void tabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            TabControl tabcontrol = (TabControl)sender;
+            if (tabcontrol.SelectedIndex == 0)
+                UpdateQualificationTable();
+        }
+        private void Pilots_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            QualificationNeedsUpdate = true;
+        }
+
+        private void Pilots_dataGrid_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
+        {
+            QualificationNeedsUpdate = true;
         }
 
         //WINDOW CLOSING
@@ -165,6 +241,9 @@ namespace chorusgui
             {
                 serializer.Serialize(stream, settings);
             }
+            //TODO save QualificationCollection
+            //TODO save RaceCollection
+            //TODO save HeatCollection
         }
 
         //WINDOW LOADED
@@ -443,6 +522,8 @@ namespace chorusgui
                                 ChorusDevices[ii].grid = grid;
                             }
                             cbVoltageMonitoring.SelectedIndex = 0;
+                            QualificationNeedsUpdate = true;
+                            UpdateQualificationTable();
                             SendData("R*A");
                             break;
                         case 'S':
@@ -460,6 +541,7 @@ namespace chorusgui
                                     {
                                         ChorusDevices[device].Band.SelectedIndex = readbuffer[3] - '0';
                                     }
+                                    QualificationNeedsUpdate = true;
                                     break;
                                 case 'C': //Current Channel (half-byte; 0 - 7)
                                     if ((readbuffer[3] - '0') != ChorusDevices[device].Channel.SelectedIndex)
@@ -470,6 +552,7 @@ namespace chorusgui
                                     {
                                         ChorusDevices[device].Channel.SelectedIndex = readbuffer[3] - '0';
                                     }
+                                    QualificationNeedsUpdate = true;
                                     break;
                                 case 'D': //Sound State (half-byte; 1 = On, 0 = Off)
                                     if (readbuffer[3] == '0')
@@ -639,6 +722,7 @@ namespace chorusgui
         void RaceMode_Checked(object sender, RoutedEventArgs e)
         {
             settings.RaceMode = cbRaceMode1.IsChecked.Value;
+            QualificationNeedsUpdate = true;
         }
         void txtRaceMode_TextChanged(object sender, TextChangedEventArgs e)
         {
@@ -662,6 +746,7 @@ namespace chorusgui
                 txtRaceMode.Text = "1000";
             }
             settings.NumberofTime = value;
+            QualificationNeedsUpdate = true;
         }
 
         //MINIMAL LAP TIME
@@ -725,6 +810,7 @@ namespace chorusgui
             if (contenders1 != null)
                 contenders1.Text = e.NewValue.ToString();
             settings.NumberOfContendersForQualification = Convert.ToInt32(e.NewValue);
+            QualificationNeedsUpdate = true;
         }
 
         //NUMBER OF QUALIFICATION RUNS
@@ -742,6 +828,7 @@ namespace chorusgui
                     settings.QualificationRaces++;
             }
             QualificationRunsLabel.Content = settings.QualificationRaces;
+            QualificationNeedsUpdate = true;
         }
 
         //NUMBER OF CONTENDERS FOR ELEMINATION RUNS
@@ -776,7 +863,6 @@ namespace chorusgui
                 Title = "Chorus Lap Timer @ " + settings.SerialPortName + "(" + settings.SerialBaud + " Baud)";
             }
         }
-
         private void VoltageMonitorTimerEvent(object source, ElapsedEventArgs e)
         {
             if (!IsRaceActive)
@@ -881,13 +967,64 @@ namespace chorusgui
         #endregion
 
         #region Raceing
+
+        private void UpdateQualificationTable()
+        {
+            if (QualificationNeedsUpdate && (ChorusDevices != null))
+            {
+                QualificationNeedsUpdate = false;
+                Qualifications.Clear();
+                Heat.Clear();
+                int numberofheats = (int)Math.Ceiling((double)Pilots.Count / settings.NumberOfContendersForQualification);
+                int i = 1, ii = 0;
+                labelCurrentHeat.Content = "Qualification Run 1, Heat 1:";
+                for (int iii = 1; iii <= settings.QualificationRaces; iii++)
+                {
+                    foreach (Pilot pilot in Pilots)
+                    {
+                        Race race = new Race();
+                        race.Pilot = pilot;
+                        race.Heat = i.ToString();
+                        race.Device = ChorusDevices[ii];
+                        Qualifications.Add(race);
+                        if (i == 1)
+                        {
+                            Heat.Add(race);
+                        }
+                        ii++;
+                        if (ii == settings.NumberOfContendersForQualification)
+                        {
+                            ii = 0;
+                            i++;
+                        }
+                    }
+                    ii = 0;
+                    i++;
+                }
+            }
+        }
+
         private void button_Click(object sender, RoutedEventArgs e)
         {
+            /*
+                k so heres an idea:
+                the tool autogenerates a list for qualification pilots & heats.
+                pilots for first qualification run will be autoselected.
+                on press on "start heat" its going take the lap times and the button will turn into "stop heat"
+                if "stop heat" is clicked you will be allowed to modify the table.
+                after that you can click "add results" and its going to add the results to the qualification table and going to load the new heat.
+
+                once all qualification heats are done its going to fill the pilots for elimination phase
+                starting heat works on the same way.
+
+                well might remove "add results" and use the same button im using for start and stop.
+            */
+
             //TODO
             if (IsRaceActive)
             {
                 SendData("R*r");
-                Start_Race.Content = "Start Race";
+                btnRace.Content = "Start Race";
                 IsRaceActive = false;
                 for (int i = 0; i < DeviceCount; i++)
                     ChorusDevices[i].grid.IsEnabled = true;
@@ -900,7 +1037,7 @@ namespace chorusgui
             {
                 SendData("R*v");
                 SendData("R*R");
-                Start_Race.Content = "Stop Race";
+                btnRace.Content = "Stop Race";
                 IsRaceActive = true;
                 for (int i = 0; i < DeviceCount; i++)
                     ChorusDevices[i].grid.IsEnabled = false;
@@ -919,6 +1056,5 @@ namespace chorusgui
         }
 
         #endregion
-
     }
 }

@@ -12,17 +12,76 @@
     <Window.Resources>
         <local:PilotCollection x:Key="PilotCollection"/>
         <CollectionViewSource x:Key="PilotCollectionViewSource" Source="{StaticResource PilotCollection}"/>
+        <local:RaceCollection x:Key="RaceCollection"/>
+        <CollectionViewSource x:Key="RaceCollectionViewSource" Source="{StaticResource RaceCollection}"/>
+        <local:QualificationCollection x:Key="QualificationCollection"/>
+        <CollectionViewSource x:Key="QualificationCollectionViewSource" Source="{StaticResource QualificationCollection}"/>
+        <local:HeatCollection x:Key="HeatCollection"/>
+        <CollectionViewSource x:Key="HeatCollectionViewSource" Source="{StaticResource HeatCollection}"/>
     </Window.Resources>
 
-    <TabControl x:Name="tabControl" Margin="0,0,2,2">
+    <TabControl x:Name="tabControl" Margin="0,0,2,2" SelectionChanged="tabControl_SelectionChanged">
         <TabItem Header="Race">
-            <Grid >
-                <Button x:Name="Start_Race" Content="Start Race" HorizontalAlignment="Left" Margin="87,102,0,0" VerticalAlignment="Top" Width="613" Click="button_Click"/>
+            <Grid>
+                <Button x:Name="btnRace" Content="Start Heat" Margin="10,10,583,0" VerticalAlignment="Top" Click="button_Click"/>
+                <DataGrid x:Name="dgCurrentHeat" Height="200" Margin="10,60,10,0" ItemsSource="{Binding Source={StaticResource HeatCollectionViewSource}}" VerticalAlignment="Top" CanUserAddRows="False" AutoGenerateColumns="false">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="RF-Channel" IsReadOnly="True" Binding="{Binding Path=RFChannel}" SortDirection="Ascending"/>
+                        <DataGridTextColumn Header="Pilot Name" IsReadOnly="True" Binding="{Binding Path=Pilot.Name}"/>
+                        <DataGridTextColumn Header="GUID" IsReadOnly="True" Binding="{Binding Path=Pilot.guid}"/>
+                        <DataGridTextColumn Header="Result" IsReadOnly="True" Binding="{Binding Path=Result}"/>
+                        <DataGridTextColumn Header="Lap 0" IsReadOnly="True"  Binding="{Binding Path=lap[0]}"/>
+                        <DataGridTextColumn Header="Lap 1" IsReadOnly="True" Binding="{Binding Path=lap[1]}"/>
+                        <DataGridTextColumn Header="Lap 2" IsReadOnly="True" Binding="{Binding Path=lap[2]}"/>
+                        <DataGridTextColumn Header="Lap 3" IsReadOnly="True" Binding="{Binding Path=lap[3]}"/>
+                        <DataGridTextColumn Header="Lap 4" IsReadOnly="True" Binding="{Binding Path=lap[4]}"/>
+                        <DataGridTextColumn Header="Lap 5" IsReadOnly="True" Binding="{Binding Path=lap[5]}"/>
+                        <DataGridTextColumn Header="Lap 6" IsReadOnly="True" Binding="{Binding Path=lap[6]}"/>
+                        <DataGridTextColumn Header="Lap 7" IsReadOnly="True" Binding="{Binding Path=lap[7]}"/>
+                        <DataGridTextColumn Header="Lap 8" IsReadOnly="True" Binding="{Binding Path=lap[8]}"/>
+                        <DataGridTextColumn Header="Lap 9" IsReadOnly="True" Binding="{Binding Path=lap[9]}"/>
+                        <DataGridTextColumn Header="Lap 10" IsReadOnly="True" Binding="{Binding Path=lap[10]}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+                <TabControl x:Name="tabControl1" Margin="10,286,10,10">
+                    <TabItem Header="Qualification">
+                        <Grid>
+                            <DataGrid x:Name="dgQualification" Margin="10" ItemsSource="{Binding Source={StaticResource QualificationCollectionViewSource}}" IsReadOnly="True" AutoGenerateColumns="false">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Heat" IsReadOnly="True" Binding="{Binding Path=Heat}" SortDirection="Ascending"/>
+                                    <DataGridTextColumn Header="Pilot Name" Binding="{Binding Path=Pilot.Name}"/>
+                                    <DataGridTextColumn Header="GUID" IsReadOnly="True" Binding="{Binding Path=Pilot.guid}"/>
+                                    <DataGridTextColumn Header="RF-Channel" IsReadOnly="True" Binding="{Binding Path=RFChannel}"/>
+                                    <DataGridTextColumn Header="Result" IsReadOnly="True" Binding="{Binding Path=Result}"/>
+                                    <DataGridTextColumn Header="Best Lap" IsReadOnly="True" Binding="{Binding Path=BestLap}"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Grid>
+                    </TabItem>
+                    <TabItem Header="Elimination Phase">
+                        <Grid>
+                            <DataGrid x:Name="dgElemination" Margin="10" IsReadOnly="True">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Heat" IsReadOnly="True" Binding="{Binding Path=Heat}" SortDirection="Ascending"/>
+                                    <DataGridTextColumn Header="Pilot Name" Binding="{Binding Path=Name}"/>
+                                    <DataGridTextColumn Header="GUID" IsReadOnly="True" Binding="{Binding Path=GUID}"/>
+                                    <DataGridTextColumn Header="RF-Channel" IsReadOnly="True" Binding="{Binding Path=RFChannel}"/>
+                                    <DataGridTextColumn Header="Result" IsReadOnly="True" Binding="{Binding Path=Result}"/>
+                                    <DataGridTextColumn Header="Best Lap in Heat" IsReadOnly="True" Binding="{Binding Path=BestLap}"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Grid>
+
+                    </TabItem>
+                </TabControl>
+                <Label x:Name="labelCurrentHeat" Content="Qualification Run 1, Heat 1:" HorizontalAlignment="Left" Margin="10,34,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
+                <Label x:Name="label6" Content="Results:" HorizontalAlignment="Left" Margin="10,260,0,0" VerticalAlignment="Top" FontWeight="Bold" RenderTransformOrigin="0.475,3.163"/>
+
             </Grid>
         </TabItem>
         <TabItem Header="Pilots">
             <Grid>
-                <DataGrid x:Name="Pilots_dataGrid" Margin="10" ItemsSource="{Binding Source={StaticResource PilotCollectionViewSource}}" AutoGenerateColumns="False">
+                <DataGrid x:Name="Pilots_dataGrid" Margin="10" ItemsSource="{Binding Source={StaticResource PilotCollectionViewSource}}" AutoGenerateColumns="False" CellEditEnding="Pilots_dataGrid_CellEditEnding">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Ranking" IsReadOnly="True" Binding="{Binding Path=Ranking}"/>
                         <DataGridTextColumn Header="Pilot Name" Binding="{Binding Path=Name}"/>
@@ -41,7 +100,7 @@
                         <RadioButton x:Name="cbRaceMode1" Content="Laps to Finish" HorizontalAlignment="Left" Margin="10,14,0,0" VerticalAlignment="Top" Checked="RaceMode_Checked"/>
                         <TextBox x:Name="txtRaceMode" HorizontalAlignment="Left" Height="23" Margin="121,10,0,0" TextWrapping="Wrap" Text="120" VerticalAlignment="Top" Width="45" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" TextChanged="txtRaceMode_TextChanged"/>
                         <RadioButton x:Name="cbRaceMode2" Content="Time to Race + Overtime (in seconds)" HorizontalAlignment="Left" Margin="183,14,0,0" VerticalAlignment="Top" IsChecked="True" Checked="RaceMode_Checked"/>
-                        
+
                         <Separator Height="12" Margin="10,38,10,0" VerticalAlignment="Top" RenderTransformOrigin="0.493,-2.983"/>
                         <Label x:Name="label1" Content="Minimal Lap Time" HorizontalAlignment="Left" Margin="10,50,0,0" VerticalAlignment="Top"/>
                         <Button x:Name="DecMinimalLapTime" Content="-" HorizontalAlignment="Left" Margin="180,55,0,0" VerticalAlignment="Top" Width="28" Click="btn_MinimalLapTime"/>
@@ -68,7 +127,7 @@
                         <Button x:Name="DecQualificationRuns" Content="-" HorizontalAlignment="Left" Margin="180,239,0,0" VerticalAlignment="Top" Width="28" Click="btn_QualificationRuns"/>
                         <Label x:Name="QualificationRunsLabel" Content="3" HorizontalAlignment="Left" Margin="245,236,0,0" VerticalAlignment="Top" HorizontalContentAlignment="Center"/>
                         <Button x:Name="IncQualificationRuns" Content="+" HorizontalAlignment="Left" Margin="300,239,0,0" VerticalAlignment="Top" Width="28" Click="btn_QualificationRuns"/>
-                        
+
                         <Separator Height="12" Margin="10,262,10,0" VerticalAlignment="Top" RenderTransformOrigin="0.493,-2.983"/>
                         <Label x:Name="label5" Content="Number of Contenders for elemination run:" HorizontalAlignment="Left" Margin="6,276,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.575,-1.251"/>
                         <TextBox x:Name="contenders2" HorizontalAlignment="Left" Height="23" Margin="274,279,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="54" IsEnabled="False" Text="0"/>
