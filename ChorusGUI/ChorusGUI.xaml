@@ -1,10 +1,11 @@
-﻿<Window x:Name="window" x:Class="chorusgui.ChorusGUI"
+﻿ <Window x:Name="window" x:Class="chorusgui.ChorusGUI"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:chorusgui"
-        mc:Ignorable="d"
+        mc:Ignorable="d mc"
+        xmlns:debugmode="debugmode"
         Title="Chorus Lap Timer" Height="714.972" Width="809.25"
         Closing="Window_Closing"
         Loaded="Window_Loaded">
@@ -27,8 +28,12 @@
                 <DataGrid x:Name="dgCurrentHeat" Height="200" Margin="10,60,10,0" ItemsSource="{Binding Source={StaticResource HeatCollectionViewSource}}" VerticalAlignment="Top" CanUserAddRows="False" AutoGenerateColumns="false">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="RF-Channel" IsReadOnly="True" Binding="{Binding Path=RFChannel}" SortDirection="Ascending"/>
-                        <DataGridTextColumn Header="Pilot Name" IsReadOnly="True" Binding="{Binding Path=Pilot.Name}"/>
-                        <DataGridTextColumn Header="GUID" IsReadOnly="True" Binding="{Binding Path=Pilot.guid}"/>
+                        <DataGridTextColumn Header="Pilot Name" IsReadOnly="True" Binding="{Binding Path=Name}"/>
+                        <mc:AlternateContent>
+                            <mc:Choice Requires="debugmode">
+                                <DataGridTextColumn Header="GUID" IsReadOnly="True" Binding="{Binding Path=guid}"/>
+                            </mc:Choice>
+                        </mc:AlternateContent>
                         <DataGridTextColumn Header="Result" IsReadOnly="True" Binding="{Binding Path=Result}"/>
                         <DataGridTextColumn Header="Lap 0" IsReadOnly="True"  Binding="{Binding Path=lap[0]}"/>
                         <DataGridTextColumn Header="Lap 1" IsReadOnly="True" Binding="{Binding Path=lap[1]}"/>
@@ -49,8 +54,12 @@
                             <DataGrid x:Name="dgQualification" Margin="10" ItemsSource="{Binding Source={StaticResource QualificationCollectionViewSource}}" IsReadOnly="True" AutoGenerateColumns="false">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Heat" IsReadOnly="True" Binding="{Binding Path=Heat}" SortDirection="Ascending"/>
-                                    <DataGridTextColumn Header="Pilot Name" Binding="{Binding Path=Pilot.Name}"/>
-                                    <DataGridTextColumn Header="GUID" IsReadOnly="True" Binding="{Binding Path=Pilot.guid}"/>
+                                    <DataGridTextColumn Header="Pilot Name" Binding="{Binding Path=Name}"/>
+                                    <mc:AlternateContent>
+                                        <mc:Choice Requires="debugmode">
+                                            <DataGridTextColumn Header="GUID" IsReadOnly="True" Binding="{Binding Path=guid}"/>
+                                        </mc:Choice>
+                                    </mc:AlternateContent>
                                     <DataGridTextColumn Header="RF-Channel" IsReadOnly="True" Binding="{Binding Path=RFChannel}"/>
                                     <DataGridTextColumn Header="Result" IsReadOnly="True" Binding="{Binding Path=Result}"/>
                                     <DataGridTextColumn Header="Best Lap" IsReadOnly="True" Binding="{Binding Path=BestLap}"/>
@@ -64,7 +73,11 @@
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Heat" IsReadOnly="True" Binding="{Binding Path=Heat}" SortDirection="Ascending"/>
                                     <DataGridTextColumn Header="Pilot Name" Binding="{Binding Path=Name}"/>
-                                    <DataGridTextColumn Header="GUID" IsReadOnly="True" Binding="{Binding Path=GUID}"/>
+                                    <mc:AlternateContent>
+                                        <mc:Choice Requires="debugmode">
+                                            <DataGridTextColumn Header="GUID" IsReadOnly="True" Binding="{Binding Path=guid}"/>
+                                        </mc:Choice>
+                                    </mc:AlternateContent>
                                     <DataGridTextColumn Header="RF-Channel" IsReadOnly="True" Binding="{Binding Path=RFChannel}"/>
                                     <DataGridTextColumn Header="Result" IsReadOnly="True" Binding="{Binding Path=Result}"/>
                                     <DataGridTextColumn Header="Best Lap in Heat" IsReadOnly="True" Binding="{Binding Path=BestLap}"/>
@@ -87,7 +100,11 @@
                         <DataGridTextColumn Header="Pilot Name" Binding="{Binding Path=Name}"/>
                         <DataGridTextColumn Header="Best Lap" IsReadOnly="True" Binding="{Binding Path=BestLap}"/>
                         <DataGridTextColumn Header="Best Race" IsReadOnly="True" Binding="{Binding Path=BestRace}"/>
-                        <DataGridTextColumn Header="GUID" IsReadOnly="True" Binding="{Binding Path=guid}"/>
+                        <mc:AlternateContent>
+                            <mc:Choice Requires="debugmode">
+                                <DataGridTextColumn Header="GUID" IsReadOnly="True" Binding="{Binding Path=guid}"/>
+                            </mc:Choice>
+                        </mc:AlternateContent>
                     </DataGrid.Columns>
                 </DataGrid>
             </Grid>
