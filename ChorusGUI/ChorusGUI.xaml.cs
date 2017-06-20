@@ -88,7 +88,7 @@ namespace chorusgui
         public string Seconds { get; set; }
         public string Laps { get; set; }
         public string BestLap { get; set; }
-        public string Heat { get; set; }
+        public int Heat { get; set; }
         public string Result
         {
             get
@@ -154,6 +154,7 @@ namespace chorusgui
         int DeviceCount;
         private SpeechSynthesizer synthesizer;
         Boolean QualificationNeedsUpdate;
+        Boolean HeatActive;
 
         private PilotCollection Pilots;
         private RaceCollection Races;
@@ -736,6 +737,7 @@ namespace chorusgui
             MinimalLapTimeLabel.Content = settings.MinimalLapTime + " seconds";
             TimeToPrepareLabel.Content = settings.TimeToPrepare + " seconds";
             settings.IsRaceActive = false;
+            HeatActive = false;
         }
         
         private void Settings_TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -1005,13 +1007,10 @@ namespace chorusgui
             {
                 if (!settings.IsRaceActive)
                 {
-                    settings.Heat = 0;
                     QualificationNeedsUpdate = false;
                     Qualifications.Clear();
                     Heat.Clear();
-                    int numberofheats = (int)Math.Ceiling((double)Pilots.Count / settings.NumberOfContendersForQualification);
-                    int i = 1, ii = 0;
-                    labelCurrentHeat.Content = "Qualification Run 1, Heat 1:";
+                    int i = 0, ii = 0;
                     for (int iii = 1; iii <= settings.QualificationRaces; iii++)
                     {
                         foreach (Pilot pilot in Pilots)
@@ -1019,14 +1018,10 @@ namespace chorusgui
                             Race race = new Race();
                             race.guid = pilot.guid;
                             race.Name = pilot.Name;
-                            race.Heat = i.ToString();
+                            race.Heat = i;
                             race.Device = ii;
                             race.RFChannel = ChorusDevices[ii].Band.Text + ", " + ChorusDevices[ii].Channel.Text;
                             Qualifications.Add(race);
-                            if (i == 1)
-                            {
-                                Heat.Add(race);
-                            }
                             ii++;
                             if (ii == settings.NumberOfContendersForQualification)
                             {
@@ -1034,13 +1029,44 @@ namespace chorusgui
                                 i++;
                             }
                         }
-                        ii = 0;
-                        i++;
+                        if (ii != 0)
+                        {
+                            i++;
+                            ii = 0;
+                        }
+                    }
+                    UpdateHeatTable();
+                }
+            }
+        }
+
+        private void UpdateHeatTable()
+        {
+
+            Heat.Clear();
+            if (settings.Heat >= (int)Math.Ceiling((double)Pilots.Count / settings.NumberOfContendersForQualification) * settings.QualificationRaces)
+            {
+                labelCurrentHeat.Content = "Elimination Heat :" + settings.Heat;
+                tabControl1.SelectedIndex = 1;
+                foreach (Race race in Races)
+                {
+                    if (race.Heat == settings.Heat)
+                    {
+                        Heat.Add(race);
                     }
                 }
-                else
+
+            }
+            else
+            {
+                labelCurrentHeat.Content = "Qualification Heat :" + settings.Heat;
+                tabControl1.SelectedIndex = 0;
+                foreach (Race race in Qualifications)
                 {
-                    //race is active, fill heat!!!
+                    if (race.Heat == settings.Heat)
+                    {
+                        Heat.Add(race);
+                    }
                 }
             }
         }
@@ -1060,12 +1086,14 @@ namespace chorusgui
 
                 well might remove "add results" and use the same button im using for start and stop.
             */
-
+            settings.Heat++;
+            UpdateHeatTable();
             //TODO
+            /*
             if (settings.IsRaceActive)
             {
                 SendData("R*r");
-                btnRace.Content = "Start Race";
+                btnRace.Content = "Start Heat";
                 settings.IsRaceActive = false;
                 for (int i = 0; i < DeviceCount; i++)
                     ChorusDevices[i].grid.IsEnabled = true;
@@ -1087,7 +1115,7 @@ namespace chorusgui
                 textBox.IsEnabled = false;
                 synthesizer.SpeakAsync("Race started");
             }
-
+            */
         }
 
         public void TriggerLap(int device, int lap, int milliseconds)
