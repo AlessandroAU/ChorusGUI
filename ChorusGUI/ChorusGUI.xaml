@@ -32,7 +32,7 @@
                 </ItemsPanelTemplate>
             </Menu.ItemsPanel>
             <MenuItem x:Name="IDM_NEW" Header="_New Event" Click="IDM_NEW_Click"/>
-            <MenuItem x:Name="IDM_LOAD" Header="_Load Event" Click="IDM_LOAD_Click"/>
+            <MenuItem x:Name="IDM_LOAD" Header="_Load Event"/>
             <MenuItem x:Name="IDM_SAVEAS" Header="_Save Event as" Click="IDM_SAVEAS_Click"/>
             <MenuItem x:Name="IDM_HELP" Header="_Help" HorizontalAlignment="Right" Click="IDM_HELP_Click"/>
         </Menu>
@@ -110,8 +110,8 @@
                 <Grid>
                     <DataGrid x:Name="Pilots_dataGrid" Margin="10" ItemsSource="{Binding Source={StaticResource PilotCollectionViewSource}}" AutoGenerateColumns="False" CellEditEnding="Pilots_dataGrid_CellEditEnding">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Ranking" IsReadOnly="True" Binding="{Binding Path=Ranking}"/>
                             <DataGridTextColumn Header="Pilot Name" Binding="{Binding Path=Name}"/>
+                            <DataGridTextColumn Header="Ranking" IsReadOnly="True" Binding="{Binding Path=Ranking}"/>
                             <DataGridTextColumn Header="Best Lap" IsReadOnly="True" Binding="{Binding Path=BestLap}"/>
                             <DataGridTextColumn Header="Best Race" IsReadOnly="True" Binding="{Binding Path=BestRace}"/>
                             <mc:AlternateContent>

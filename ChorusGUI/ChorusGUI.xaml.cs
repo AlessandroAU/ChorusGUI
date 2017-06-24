@@ -13,7 +13,6 @@ Gibt es keine Sprachbibliothek um auch den Nickname ansagen zu lassen?
 
 //TODO: search for TODO
 //TODO: if(settings.IsRaceActive) disable controlls!!!!
-//TODO: single file for race
 //TODO: context menu for heat to delete single laps in case of false result
 //TODO: doubleclick or contextmenu for heat results in qualification or race datagrid
 //TODO: verify amount of needed devices!
@@ -140,6 +139,8 @@ namespace chorusgui
         public Boolean VoltageMonitoring { get; set; }
         public int VoltageMonitorDevice { get; set; }
         public string Voice { get; set; }
+
+        public List<string> RecentFiles = new List<string>();
     }
 
     public partial class ChorusGUI : Window
@@ -175,7 +176,10 @@ namespace chorusgui
             Heat = (HeatCollection)Resources["HeatCollection"];
 
             LoadSettings();
-            Event.LoadEvent("currentevent.xml");
+            if (settings.RecentFiles.Count == 0)
+                settings.RecentFiles.Add("currentevent.xml");
+            UpdateRecentFileList("");
+            Event.LoadEvent(settings.RecentFiles[0]);
             Title = "Chorus Lap Timer @ " + settings.SerialPortName + "(" + settings.SerialBaud + " Baud) -=] "+ Event.name+" [=-";
             aTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
             VoltageMonitorTimer.Elapsed += new ElapsedEventHandler(VoltageMonitorTimerEvent);
@@ -213,7 +217,7 @@ namespace chorusgui
         //WINDOW CLOSING
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            Event.SaveEvent("currentevent.xml");
+            Event.SaveEvent(settings.RecentFiles[0]);
             XmlSerializer serializer = new XmlSerializer(typeof(Settings));
             using (FileStream stream = new FileStream("settings.xml", FileMode.Create))
             {
@@ -263,22 +267,22 @@ namespace chorusgui
                     switch (readbuffer[0])
                     {
                         case 'N': //ENUMERATE DEVICES
-                            //TODO VERIFY SETTINGS!!!
                             //TODO: VoltageMonitoring
                             if (readbuffer.Length < 2)
                                 break;
                             NumberOfDevices = readbuffer [1] - '0';
                             if (NumberOfDevices == 0)
                                 break;
+                            if ((Event.IsRaceActive) && (NumberOfDevices < Event.NumberOfContendersForQualification) && (NumberOfDevices < Event.NumberOfContendersForRace))
+                            {
+                                //TODO: mess with this shit
+                                MessageBox.Show("BIIIIIIIIIIIIG PROBLEM. The active Event needs more devices!", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+                            }
                             contender_slider1.Maximum = NumberOfDevices;
                             contender_slider2.Maximum = NumberOfDevices;
                             int tmp = NumberOfDevices;
                             if ((tmp % 2) == 1)
                                 tmp--;
-                            if (Event.NumberOfContendersForQualification > NumberOfDevices)
-                                Event.NumberOfContendersForQualification = tmp;
-                            if (Event.NumberOfContendersForRace > NumberOfDevices)
-                                Event.NumberOfContendersForRace = tmp;
                             ChorusDevices = new ChorusDeviceClass[NumberOfDevices];
                             for (int ii = 0; ii < NumberOfDevices; ii++)
                             {
@@ -931,6 +935,116 @@ namespace chorusgui
 
         #endregion
 
+        #region EventLoading
+        private void IDM_LOAD_Click(object sender, RoutedEventArgs e)
+        {
+            if (MessageBox.Show("Do you want to save the current Event?", "WARNING", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+            {
+                SaveFileDialog saveFileDialog = new SaveFileDialog();
+                saveFileDialog.Filter = "Extensible Markup Language File (*.xml)|*.xml|Any File (*.*)|*.*";
+                if (saveFileDialog.ShowDialog() != true)
+                    return;
+                Event.SaveEvent(saveFileDialog.FileName);
+            }
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "Extensible Markup Language File (*.xml)|*.xml|Any File (*.*)|*.*";
+            if (openFileDialog.ShowDialog() == true)
+            {
+                Event.LoadEvent(openFileDialog.FileName);
+            }
+        }
+        private void IDM_SAVEAS_Click(object sender, RoutedEventArgs e)
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "Extensible Markup Language File (*.xml)|*.xml|Any File (*.*)|*.*";
+            if (saveFileDialog.ShowDialog() != true)
+                return;
+            Event.SaveEvent(saveFileDialog.FileName);
+        }
+        private void IDM_NEW_Click(object sender, RoutedEventArgs e)
+        {
+            if (MessageBox.Show("Do you want to save the current Event?", "WARNING", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+            {
+                SaveFileDialog saveFileDialog = new SaveFileDialog();
+                saveFileDialog.Filter = "Extensible Markup Language File (*.xml)|*.xml|Any File (*.*)|*.*";
+                if (saveFileDialog.ShowDialog() != true)
+                    return;
+                Event.SaveEvent(saveFileDialog.FileName);
+            }
+            Event.races.Clear();
+            Event.qualifications.Clear();
+            Event.pilots.Clear();
+            Heat.Clear();
+            Event.CurrentHeat = 0;
+            Event.IsRaceActive = false;
+        }
+
+        private void txtEventName_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            Event.name = txtEventName.Text;
+            Title = "Chorus Lap Timer @ " + settings.SerialPortName + "(" + settings.SerialBaud + " Baud) -=] " + Event.name + " [=-";
+        }
+        private void IDM_HELP_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("help? why? its open source!", "TODO: IDM_HELP_Click");
+        }
+
+        private void IDM_LOAD_ClickExisting(object sender, RoutedEventArgs e)
+        {
+            MenuItem menuItem = (MenuItem)sender;
+            if (MessageBox.Show("Do you want to save the current Event?", "WARNING", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+            {
+                SaveFileDialog saveFileDialog = new SaveFileDialog();
+                saveFileDialog.Filter = "Extensible Markup Language File (*.xml)|*.xml|Any File (*.*)|*.*";
+                if (saveFileDialog.ShowDialog() != true)
+                    return;
+                Event.SaveEvent(saveFileDialog.FileName);
+            }
+            Event.LoadEvent((string)menuItem.Tag);
+        }
+
+        public void UpdateRecentFileList(string filename)
+        {
+            if (filename != "")
+            {
+                var index = settings.RecentFiles.IndexOf(filename);
+                if (index == -1)
+                {
+                    settings.RecentFiles.Insert(0, filename);
+                }
+                else
+                {
+                    settings.RecentFiles.RemoveAt(index);
+                    settings.RecentFiles.Insert(0, filename);
+                }
+                while (settings.RecentFiles.Count > 10)
+                {
+                    settings.RecentFiles.RemoveAt(settings.RecentFiles.Count);
+                }
+            }
+            if (settings.RecentFiles.Count > 0)
+            {
+                IDM_LOAD.Items.Clear();
+                MenuItem item = new MenuItem();
+                item.Name = "IDM_LOADOPEN";
+                item.Header = "Load Event";
+                item.Click += new RoutedEventHandler(IDM_LOAD_Click);
+                IDM_LOAD.Items.Add(item);
+                IDM_LOAD.Items.Add(new Separator());
+                foreach (string file in settings.RecentFiles)
+                {
+                    item = new MenuItem();
+                    item.Name = "IDM_LOADOPEN";
+                    item.Header = file; //TODO shorten filename -> strip path!!!
+                    item.Tag = file;
+                    item.Click += new RoutedEventHandler(IDM_LOAD_ClickExisting);
+                    IDM_LOAD.Items.Add(item);
+                }
+            }
+        }
+        #endregion
+
+
         #region Raceing
 
         private void UpdateQualificationTable()
@@ -1056,57 +1170,5 @@ namespace chorusgui
 
         #endregion
 
-        private void IDM_LOAD_Click(object sender, RoutedEventArgs e)
-        {
-            if (MessageBox.Show("Do you want to save the current Event?", "WARNING", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
-            {
-                SaveFileDialog saveFileDialog = new SaveFileDialog();
-                saveFileDialog.Filter = "Extensible Markup Language File (*.xml)|*.xml|Any File (*.*)|*.*";
-                if (saveFileDialog.ShowDialog() != true)
-                    return;
-                Event.SaveEvent(saveFileDialog.FileName);
-            }
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "Extensible Markup Language File (*.xml)|*.xml|Any File (*.*)|*.*";
-            if (openFileDialog.ShowDialog() == true)
-            {
-                Event.LoadEvent(openFileDialog.FileName);
-            }
-        }
-        private void IDM_SAVEAS_Click(object sender, RoutedEventArgs e)
-        {
-            SaveFileDialog saveFileDialog = new SaveFileDialog();
-            saveFileDialog.Filter = "Extensible Markup Language File (*.xml)|*.xml|Any File (*.*)|*.*";
-            if (saveFileDialog.ShowDialog() != true)
-                return;
-            Event.SaveEvent(saveFileDialog.FileName);
-        }
-        private void IDM_NEW_Click(object sender, RoutedEventArgs e)
-        {
-            if (MessageBox.Show("Do you want to save the current Event?", "WARNING", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
-            {
-                SaveFileDialog saveFileDialog = new SaveFileDialog();
-                saveFileDialog.Filter = "Extensible Markup Language File (*.xml)|*.xml|Any File (*.*)|*.*";
-                if (saveFileDialog.ShowDialog() != true)
-                    return;
-                Event.SaveEvent(saveFileDialog.FileName);
-            }
-            Event.races.Clear();
-            Event.qualifications.Clear();
-            Event.pilots.Clear();
-            Heat.Clear();
-            Event.CurrentHeat = 0;
-            Event.IsRaceActive = false;
-        }
-
-        private void txtEventName_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            Event.name = txtEventName.Text;
-            Title = "Chorus Lap Timer @ " + settings.SerialPortName + "(" + settings.SerialBaud + " Baud) -=] " + Event.name + " [=-";
-        }
-        private void IDM_HELP_Click(object sender, RoutedEventArgs e)
-        {
-            MessageBox.Show("help? why? its open source!", "TODO: IDM_HELP_Click");
-        }
     }
 }

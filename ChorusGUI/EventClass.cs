@@ -220,6 +220,7 @@ namespace chorusgui
                             break;
                     }
                 }
+                gui.UpdateRecentFileList(filename);
             }
             catch (Exception ex)
             {
@@ -243,11 +244,8 @@ namespace chorusgui
             rootNode.Attributes.Append(nsAttribute);
             xmlDoc.AppendChild(rootNode);
 
-            XmlNode xmlItem;
-            XmlText xmlText;
-
-            xmlItem = xmlDoc.CreateElement("name");
-            xmlText = xmlDoc.CreateTextNode(this.name);
+            XmlNode xmlItem = xmlDoc.CreateElement("name");
+            XmlText xmlText = xmlDoc.CreateTextNode(this.name);
             xmlItem.AppendChild(xmlText);
             rootNode.AppendChild(xmlItem);
 
@@ -408,8 +406,8 @@ namespace chorusgui
 
             }
             rootNode.AppendChild(xmlItem);
-
             xmlDoc.Save(filename);
+            gui.UpdateRecentFileList(filename);
             return true;
         }
 
