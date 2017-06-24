@@ -174,7 +174,7 @@
                         </Grid>
                     </TabItem>
                     <TabItem Header="Sounds" FontWeight="Bold">
-                        <Grid>
+                        <Grid x:Name="SoundSettingsGrid">
                             <ComboBox x:Name="cbSpeechVoice" HorizontalAlignment="Left" Margin="149,53,0,0" VerticalAlignment="Top" Width="385" SelectionChanged="cbSpeechVoice_SelectionChanged"/>
 
                         </Grid>

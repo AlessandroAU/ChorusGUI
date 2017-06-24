@@ -11,11 +11,12 @@ Gibt es keine Sprachbibliothek um auch den Nickname ansagen zu lassen?
 ------------------------
 */
 
-//TODO: search for TODO
-//TODO: if(settings.IsRaceActive) disable controlls!!!!
+//TODO by priority
+//TODO: code weirdo racing system
 //TODO: context menu for heat to delete single laps in case of false result
 //TODO: doubleclick or contextmenu for heat results in qualification or race datagrid
 //TODO: verify amount of needed devices!
+//TODO: search for TODO
 
 using System;
 using System.IO;
@@ -152,7 +153,6 @@ namespace chorusgui
         int TimerCalibration = 1000;
         private SpeechSynthesizer synthesizer;
         Boolean QualificationNeedsUpdate;
-        Boolean HeatActive;
         int NumberOfDevices;
 
         EventClass Event;
@@ -174,7 +174,6 @@ namespace chorusgui
             Event.qualifications = (QualificationCollection)Resources["QualificationCollection"];
             Event.races = (RaceCollection)Resources["RaceCollection"];
             Heat = (HeatCollection)Resources["HeatCollection"];
-
             LoadSettings();
             if (settings.RecentFiles.Count == 0)
                 settings.RecentFiles.Add("currentevent.xml");
@@ -499,6 +498,10 @@ namespace chorusgui
                                 ti.Name = "DEVICE" + ii;
                                 ti.Content = grid;
                                 Settings_TabControl.Items.Add(ti);
+                                if (Event.IsRaceActive)
+                                {
+                                    grid.IsEnabled = false;
+                                }
                                 ChorusDevices[ii].grid = grid;
                             }
                             cbVoltageMonitoring.SelectedIndex = 0;
@@ -1117,55 +1120,41 @@ namespace chorusgui
 
         private void button_Click(object sender, RoutedEventArgs e)
         {
-            /*
-                k so heres an idea:
-                the tool autogenerates a list for qualification pilots & heats.
-                pilots for first qualification run will be autoselected.
-                on press on "start heat" its going take the lap times and the button will turn into "stop heat"
-                if "stop heat" is clicked you will be allowed to modify the table.
-                after that you can click "add results" and its going to add the results to the qualification table and going to load the new heat.
-
-                once all qualification heats are done its going to fill the pilots for elimination phase
-                starting heat works on the same way.
-
-                well might remove "add results" and use the same button im using for start and stop.
-            */
-            Event.CurrentHeat++;
-            UpdateHeatTable();
-            //TODO
-            /*
-            if (settings.IsRaceActive)
+            if (btnRace.Content.ToString() == "Start Heat")
             {
-                SendData("R*r");
-                btnRace.Content = "Start Heat";
-                settings.IsRaceActive = false;
-                for (int i = 0; i < DeviceCount; i++)
+                Event.IsRaceActive = true;
+                for (int i = 0; i < NumberOfDevices; i++)
                     ChorusDevices[i].grid.IsEnabled = true;
-                Pilots_dataGrid.IsEnabled = true;
-                RaceSettingsGrid.IsEnabled = true;
-                textBox.IsEnabled = true;
-                synthesizer.SpeakAsync("Race finished");
-            }
-            else
-            {
-                SendData("R*v");
-                SendData("R*R");
-                btnRace.Content = "Stop Race";
-                settings.IsRaceActive = true;
-                for (int i = 0; i < DeviceCount; i++)
-                    ChorusDevices[i].grid.IsEnabled = false;
                 Pilots_dataGrid.IsEnabled = false;
                 RaceSettingsGrid.IsEnabled = false;
-                textBox.IsEnabled = false;
+                btnRace.Content = "Stop Heat";
+                //TODO timer to start
+                SendData("R*v");
+                SendData("R*R");
                 synthesizer.SpeakAsync("Race started");
             }
-            */
+            else if (btnRace.Content.ToString() == "Stop Heat")
+            {
+                SendData("R*r");
+                btnRace.Content = "Verify Results";
+                synthesizer.SpeakAsync("Race finished");
+            }
+            else if (btnRace.Content.ToString() == "Verify Results")
+            {
+                Event.CurrentHeat++;
+                if (Event.CurrentHeat >= (int)Math.Ceiling((double)Event.pilots.Count / Event.NumberOfContendersForQualification) * Event.QualificationRaces)
+                {
+                    //TODO build elemination table
+                }
+                btnRace.Content = "Start Heat";
+                UpdateHeatTable();
+            }
         }
 
         public void TriggerLap(int device, int lap, int milliseconds)
         {
             ChorusDevices[device].LapTimes.Items.Add(new { Lap = lap.ToString(), Time = milliseconds.ToString() });
-            //TODO
+            //TODO add lap times to heat!
         }
 
         #endregion

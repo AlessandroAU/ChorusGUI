@@ -22,6 +22,7 @@ namespace chorusgui
         public PilotCollection pilots;
         public QualificationCollection qualifications;
         public RaceCollection races;
+        public Boolean IsRaceComplete = false;
 
         public EventClass()
         {
@@ -59,6 +60,16 @@ namespace chorusgui
                                 gui.cbSkipFirstLap.IsChecked = false;
                             }
                             break;
+                        case "isracecomplete":
+                            if (xmlNode.InnerText.ToLower() == "true")
+                            {
+                                IsRaceComplete = true;
+                            }
+                            else
+                            {
+                                IsRaceComplete = false;
+                            }
+                            break;
                         case "doubleout":
                             if (xmlNode.InnerText.ToLower() == "true")
                             {
@@ -89,10 +100,14 @@ namespace chorusgui
                             if (xmlNode.InnerText.ToLower() == "true")
                             {
                                 IsRaceActive = true;
+                                gui.Pilots_dataGrid.IsEnabled = false;
+                                gui.RaceSettingsGrid.IsEnabled = false;
                             }
                             else
                             {
                                 IsRaceActive = false;
+                                gui.Pilots_dataGrid.IsEnabled = true;
+                                gui.RaceSettingsGrid.IsEnabled = true;
                             }
                             break;
                         case "numberoftimeforheat":
@@ -261,6 +276,11 @@ namespace chorusgui
 
             xmlItem = xmlDoc.CreateElement("racemode");
             xmlText = xmlDoc.CreateTextNode(this.RaceMode.ToString());
+            xmlItem.AppendChild(xmlText);
+            rootNode.AppendChild(xmlItem);
+
+            xmlItem = xmlDoc.CreateElement("isracecomplete");
+            xmlText = xmlDoc.CreateTextNode(this.IsRaceComplete.ToString());
             xmlItem.AppendChild(xmlText);
             rootNode.AppendChild(xmlItem);
 
