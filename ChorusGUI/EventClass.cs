@@ -155,7 +155,7 @@ namespace chorusgui
                                             pilot.Ranking = xmlPilot.InnerText;
                                             break;
                                         case "bestlap":
-                                            pilot.BestLap = xmlPilot.InnerText;
+                                            pilot.BestLap = int.Parse(xmlPilot.InnerText);
                                             break;
                                         case "bestrace":
                                             pilot.BestRace = xmlPilot.InnerText;
@@ -169,6 +169,7 @@ namespace chorusgui
                             foreach (XmlNode xmlQualification in xmlNode)
                             {
                                 Race race = new Race();
+                                race.lap.race = race;
                                 foreach (XmlNode xmlRace in xmlQualification)
                                 {
                                     switch (xmlRace.Name.ToLower())
@@ -192,17 +193,19 @@ namespace chorusgui
                                             race.Device = Int32.Parse(xmlRace.InnerText);
                                             break;
                                         case "laps":
-                                            race.Laps = xmlRace.InnerText;
+                                            race.laps = xmlRace.InnerText;
                                             break;
                                     }
                                 }
                                 qualifications.Add(race);
+                                gui.CalculateResults(race);
                             }
                             break;
                         case "races":
                             foreach (XmlNode xmlRaces in xmlNode)
                             {
                                 Race race = new Race();
+                                race.lap.race = race;
                                 foreach (XmlNode xmlRace in xmlRaces)
                                 {
                                     switch (xmlRace.Name.ToLower())
@@ -226,11 +229,12 @@ namespace chorusgui
                                             race.Device = Int32.Parse(xmlRace.InnerText);
                                             break;
                                         case "laps":
-                                            race.Laps = xmlRace.InnerText;
+                                            race.laps = xmlRace.InnerText;
                                             break;
                                     }
                                 }
                                 races.Add(race);
+                                gui.CalculateResults(race);
                             }
                             break;
                     }
@@ -347,10 +351,10 @@ namespace chorusgui
                     xmlchild.AppendChild(xmlText);
                     xmlpilot.AppendChild(xmlchild);
                 }
-                if (pilot.BestLap != null)
+                if (pilot.BestLap != 0)
                 {
                     xmlchild = xmlDoc.CreateElement("bestlap");
-                    xmlText = xmlDoc.CreateTextNode(pilot.BestLap);
+                    xmlText = xmlDoc.CreateTextNode(pilot.BestLap.ToString());
                     xmlchild.AppendChild(xmlText);
                     xmlpilot.AppendChild(xmlchild);
                 }
@@ -385,10 +389,10 @@ namespace chorusgui
                 xmlchild.AppendChild(xmlText);
                 xmlrace.AppendChild(xmlchild);
 
-                if (race.Laps != null)
+                if (race.laps != null)
                 {
-                    xmlchild = xmlDoc.CreateElement("bestrace");
-                    xmlText = xmlDoc.CreateTextNode(race.Laps);
+                    xmlchild = xmlDoc.CreateElement("laps");
+                    xmlText = xmlDoc.CreateTextNode(race.laps);
                     xmlchild.AppendChild(xmlText);
                     xmlrace.AppendChild(xmlchild);
                 }
@@ -416,10 +420,10 @@ namespace chorusgui
                 xmlchild.AppendChild(xmlText);
                 xmlrace.AppendChild(xmlchild);
 
-                if (race.Laps != null)
+                if (race.laps != null)
                 {
-                    xmlchild = xmlDoc.CreateElement("bestrace");
-                    xmlText = xmlDoc.CreateTextNode(race.Laps);
+                    xmlchild = xmlDoc.CreateElement("laps");
+                    xmlText = xmlDoc.CreateTextNode(race.laps);
                     xmlchild.AppendChild(xmlText);
                     xmlrace.AppendChild(xmlchild);
                 }

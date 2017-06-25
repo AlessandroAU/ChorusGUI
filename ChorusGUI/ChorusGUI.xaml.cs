@@ -101,34 +101,63 @@ namespace chorusgui
         }
         public string Ranking { get; set; }
         public string Name { get; set; }
-        public string BestLap { get; set; }
+        public int BestLap { get; set; }
         public string BestRace { get; set; }
     }
+
+    public class _Lap
+    {
+        public Race race;
+        public string this[int index]
+        {
+            get {
+                if (race == null)
+                    return null;
+                if (race.laps == null)
+                    return null;
+                string[] laps = race.laps.Split(';');
+                if (laps.Length-2 < index)
+                    return null;
+                var pos = laps[index].IndexOf(":");
+                if (pos == -1)
+                    return null;
+                return laps[index].Substring(pos + 1);
+            }
+            set { }
+        }
+    }
+
 
     [Serializable]
     public class Race
     {
-        public string Name { get; set; }
+        _Lap _lap = new _Lap();
         public string guid { get; set; }
         public Pilot pilot { get; set; }
         public int Device { get; set; }
-        public string RFChannel { get; set; }
-        public string Seconds { get; set; }
-        public string Laps { get; set; }
-        public string BestLap { get; set; }
-        public int Heat { get; set; }
-        public string Result
-        {
-            get
-            {
-                if (Laps != null)
-                    return "Laps: " + Laps + " seconds: " + Seconds;
-                else if (Seconds != null)
-                    return "Seconds: "+ Seconds;
-                return null;
+        public string RFChannel {
+            get {
+                //TODO: PRETTIFY ME
+                return Device.ToString();
             }
-            set { }
+            set { /*not needed*/ }
         }
+        public string laps { get; set; }
+        public int BestLap { get; set; }
+        public int Heat { get; set; }
+        public int overtime { get; set; }
+        public int totallaps { get; set; }
+        public Boolean finished { get; set; }
+        public _Lap lap {
+            get {
+                return _lap;
+            }
+            set
+            {
+                lap = value;
+            }
+        }
+        public string Result { get; set; }
     }
 
     [Serializable]
@@ -505,6 +534,7 @@ namespace chorusgui
                                 ChorusDevices[ii].grid = grid;
                             }
                             cbVoltageMonitoring.SelectedIndex = 0;
+                            UpdateHeatTable();
                             SendData("R*A");
                             break;
                         case 'S':
@@ -1049,7 +1079,6 @@ namespace chorusgui
 
 
         #region Raceing
-
         private void UpdateQualificationTable()
         {
             if (QualificationNeedsUpdate && (ChorusDevices != null))
@@ -1065,11 +1094,11 @@ namespace chorusgui
                         foreach (Pilot pilot in Event.pilots)
                         {
                             Race race = new Race();
+                            race.lap.race = race;
                             race.guid = pilot.guid;
-                            race.Name = pilot.Name;
+                            race.pilot = pilot;
                             race.Heat = i;
                             race.Device = ii;
-                            race.RFChannel = ChorusDevices[ii].Band.Text + ", " + ChorusDevices[ii].Channel.Text;
                             Event.qualifications.Add(race);
                             ii++;
                             if (ii == Event.NumberOfContendersForQualification)
@@ -1116,6 +1145,7 @@ namespace chorusgui
                     }
                 }
             }
+            UpdateGridViews();
         }
 
         private void button_Click(object sender, RoutedEventArgs e)
@@ -1128,7 +1158,7 @@ namespace chorusgui
                 Pilots_dataGrid.IsEnabled = false;
                 RaceSettingsGrid.IsEnabled = false;
                 btnRace.Content = "Stop Heat";
-                //TODO timer to start
+                //TODO: timer to start
                 SendData("R*v");
                 SendData("R*R");
                 synthesizer.SpeakAsync("Race started");
@@ -1138,14 +1168,21 @@ namespace chorusgui
                 SendData("R*r");
                 btnRace.Content = "Verify Results";
                 synthesizer.SpeakAsync("Race finished");
+                foreach (Race race in Heat)
+                {
+                    CalculateResults(race);
+                }
+                UpdateGridViews();
             }
             else if (btnRace.Content.ToString() == "Verify Results")
             {
                 Event.CurrentHeat++;
                 if (Event.CurrentHeat >= (int)Math.Ceiling((double)Event.pilots.Count / Event.NumberOfContendersForQualification) * Event.QualificationRaces)
                 {
-                    //TODO build elemination table
+                    UpdateEliminationTable();
+                    tabControl1.SelectedIndex = 1; //select EliminationTab here
                 }
+                //TODO check if race is over!
                 btnRace.Content = "Start Heat";
                 UpdateHeatTable();
             }
@@ -1154,9 +1191,184 @@ namespace chorusgui
         public void TriggerLap(int device, int lap, int milliseconds)
         {
             ChorusDevices[device].LapTimes.Items.Add(new { Lap = lap.ToString(), Time = milliseconds.ToString() });
-            //TODO add lap times to heat!
+            if (btnRace.Content.ToString() == "Stop Heat")
+            {
+                if (Event.CurrentHeat >= (int)Math.Ceiling((double)Event.pilots.Count / Event.NumberOfContendersForQualification) * Event.QualificationRaces)
+                {
+                    foreach (Race race in Event.races)
+                    {
+                        HandleLap(race, device, lap, milliseconds);
+
+                    }
+                }
+                else
+                {
+                    foreach (Race race in Event.qualifications)
+                    {
+                        HandleLap(race, device, lap, milliseconds);
+                    }
+                }
+            }
+            UpdateGridViews();
         }
 
+        void UpdateGridViews()
+        {
+            //MSDN gotta be kidding me. wtf @ this way of updating cells?
+            var bleh1 = dgCurrentHeat.ItemsSource;
+            dgCurrentHeat.ItemsSource = null;
+            dgCurrentHeat.ItemsSource = bleh1;
+            var bleh2 = dgQualification.ItemsSource;
+            dgQualification.ItemsSource = null;
+            dgQualification.ItemsSource = bleh2;
+            var bleh3 = dgElemination.ItemsSource;
+            dgElemination.ItemsSource = null;
+            dgElemination.ItemsSource = bleh3;
+        }
+
+        public void HandleLap(Race race, int device, int lap, int milliseconds)
+        {
+            if ((race.Device == device) && (race.Heat == Event.CurrentHeat))
+            {
+                if (lap > 0)
+                {
+                    if ((milliseconds < race.BestLap) || (race.BestLap == 0))
+                        race.BestLap = milliseconds;
+                    if ((milliseconds < race.pilot.BestLap) || (race.pilot.BestLap == 0))
+                        race.pilot.BestLap = milliseconds;
+                }
+                race.laps += lap + ":" + milliseconds + ";";
+                CalculateResults(race);
+            }
+        }
+
+        public void CalculateResults(Race race)
+        {
+            int lapnum = 0;
+            int time = 0;
+            int totaltime = 0;
+            if (race.laps != null)
+            {
+                string[] laps = race.laps.Split(';');
+                int pos;
+                foreach (string lap in laps)
+                {
+                    pos = lap.IndexOf(":");
+                    if (pos == -1)
+                        continue;
+                    lapnum = int.Parse(lap.Substring(0, pos));
+                    time = int.Parse(lap.Substring(pos + 1));
+                    if ((lapnum == 0) && (!Event.SkipFirstLap))
+                    {
+                        totaltime += time;
+                    }
+                    if (lapnum > 0)
+                        totaltime += time;
+                    if (Event.RaceMode)
+                    {
+                        //laps to finish
+                        if (lapnum == Event.NumberofTimeForHeat)
+                            break;
+                    }
+                    else
+                    {
+                        //time to race
+                        if (totaltime >= Event.NumberofTimeForHeat * 1000)
+                            break;
+                    }
+                }
+            }
+            race.finished = true;
+            if (Event.RaceMode)
+            {
+                //laps to finish
+                race.Result = "ms: " + totaltime;
+                race.overtime = totaltime;
+                if (lapnum < Event.NumberofTimeForHeat)
+                {
+                    race.Result = race.Result + " DNF";
+                    race.finished = false;
+                }
+            }
+            else
+            {
+                //time to race
+                race.Result = "Laps: " + (lapnum - 1) + " Overtime: " + time;
+                race.totallaps = lapnum - 1;
+                race.overtime = time;
+                if (totaltime < Event.NumberofTimeForHeat * 1000)
+                { 
+                    race.Result = race.Result + " DNF";
+                    race.finished = false;
+                }
+
+            }
+        }
+
+        private void dgCurrentHeat_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
+        {
+            if (btnRace.Content.ToString() == "Verify Results")
+            {
+                if (dgCurrentHeat.SelectedCells.Count == 1)
+                {
+                    if (dgCurrentHeat.SelectedCells[0].Column.Header.ToString().Substring(0, 3) == "Lap")
+                    {
+                        var lap = int.Parse(dgCurrentHeat.SelectedCells[0].Column.Header.ToString().Substring(3));
+                        Race race = dgCurrentHeat.SelectedCells[0].Item as Race;
+                        if (race.lap[lap] != null)
+                        {
+                            ContextMenu contextMenu1 = new ContextMenu();
+                            MenuItem menuItem1 = new MenuItem();
+                            menuItem1.Header = "Delete Lap";
+                            menuItem1.Tag = new { lap=lap, race=race };
+                            menuItem1.Click += IDM_DELETELAP;
+                            contextMenu1.Items.Add(menuItem1);
+                            dgCurrentHeat.ContextMenu = contextMenu1;
+                            return;
+                        }
+                    }
+                }
+            }
+            dgCurrentHeat.ContextMenu = null;
+        }
+
+        private void IDM_DELETELAP(object sender, RoutedEventArgs e)
+        {
+            if (MessageBox.Show("Do you really want to delete this lap?", "Delete Lap", MessageBoxButton.YesNo,MessageBoxImage.Question) == MessageBoxResult.Yes)
+            {
+                MenuItem menuItem1 = sender as MenuItem;
+                object o = menuItem1.Tag;
+                int lapnum = (int)o?.GetType().GetProperty("lap")?.GetValue(o, null);
+                Race race = (Race)o?.GetType().GetProperty("race")?.GetValue(o, null);
+                string[] laps = race.laps.Split(';');
+                int newlap=0;
+                int newtime=0;
+                race.laps = "";
+                foreach (string lap in laps)
+                {
+                    string[] lapinfo = lap.Split(':');
+                    if (lapinfo.Length == 2)
+                    {
+                        newtime += int.Parse(lapinfo[1]);
+                        if (lapnum != int.Parse(lapinfo[0]))
+                        {
+                            race.laps += newlap + ":" + newtime + ";";
+                            newlap++;
+                            newtime = 0;
+                        }
+                    }
+
+                }
+                CalculateResults(race);
+                UpdateGridViews();
+            }
+
+        }
+        private void UpdateEliminationTable()
+        {
+            //Event.CurrentHeat == first heat number for eliminationtable!!!
+            //TODO build elemination table
+        }
         #endregion
 
     }
