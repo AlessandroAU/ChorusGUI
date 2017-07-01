@@ -150,7 +150,7 @@
 
                             <Separator Height="12" Margin="13,174,7,0" VerticalAlignment="Top" RenderTransformOrigin="0.493,-2.983"/>
                             <CheckBox x:Name="cbSkipFirstLap" Content="Skip First Lap" HorizontalAlignment="Left" Margin="13,191,0,0" VerticalAlignment="Top" Click="SkipFirstLap_CLick" IsChecked="True"/>
-                            <ComboBox x:Name="cbElimination" HorizontalAlignment="Left" Margin="184,188,0,0" VerticalAlignment="Top" Width="147" SelectedIndex="1">
+                            <ComboBox x:Name="cbElimination" HorizontalAlignment="Left" Margin="184,188,0,0" VerticalAlignment="Top" Width="147" SelectedIndex="1" SelectionChanged="cbElimination_SelectionChanged">
                                 <ComboBoxItem Content="Single Out" Tag="singleout" HorizontalAlignment="Left" Width="145"/>
                                 <ComboBoxItem Content="Double Out" Tag="doubleout" HorizontalAlignment="Left" Width="145"/>
                             </ComboBox>
@@ -173,7 +173,7 @@
 
                             <Separator Height="12" Margin="13,398,7,0" VerticalAlignment="Top" RenderTransformOrigin="0.493,-2.983"/>
                             <Label x:Name="label7" Content="Number of Contenders for Elimination Phase:" HorizontalAlignment="Left" Margin="13,415,0,0" VerticalAlignment="Top"/>
-                            <TextBox x:Name="txtcontenders" HorizontalAlignment="Left" Height="23" Margin="277,417,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="54" Text="0" TextChanged="txtRaceMode_TextChanged"/>
+                            <TextBox x:Name="txtContenders" HorizontalAlignment="Left" Height="23" Margin="277,417,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="54" Text="0" TextChanged="txtContenders_TextChanged"/>
                         </Grid>
                     </TabItem>
                     <TabItem Header="App Settings" FontWeight="Bold">

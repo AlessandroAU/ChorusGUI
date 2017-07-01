@@ -1068,7 +1068,6 @@ namespace chorusgui
             {
                 Event.LoadEvent(openFileDialog.FileName);
                 UpdateHeatTable();
-                UpdateGridViews();
                 if (Event.IsRaceActive)
                 {
                     for (int i = 0; i < NumberOfDevices; i++)
@@ -1125,7 +1124,6 @@ namespace chorusgui
             Pilots_dataGrid.IsEnabled = true;
             RaceSettingsGrid.IsEnabled = true;
             UpdateHeatTable();
-            UpdateGridViews();
         }
 
         private void txtEventName_TextChanged(object sender, TextChangedEventArgs e)
@@ -1133,6 +1131,36 @@ namespace chorusgui
             Event.name = txtEventName.Text;
             Title = "Chorus Lap Timer @ " + settings.SerialPortName + "(" + settings.SerialBaud + " Baud) -=] " + Event.name + " [=-";
         }
+
+        private void txtContenders_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            int value;
+            try
+            {
+                value = Convert.ToInt32(txtContenders.Text);
+            }
+            catch (FormatException)
+            {
+                value = 0;
+            }
+            if (value < 1)
+            {
+                value = 1;
+                txtContenders.Text = "1";
+            }
+            if (value > 1000)
+            {
+                value = 1000;
+                txtContenders.Text = "1000";
+            }
+            Event.Contenders = value;
+            if (!Event.IsRaceActive)
+            {
+                BuildEventTables();
+            }
+        }
+
+
         private void IDM_HELP_Click(object sender, RoutedEventArgs e)
         {
             MessageBox.Show("help? why? its open source!", "TODO: IDM_HELP_Click");
@@ -1153,7 +1181,6 @@ namespace chorusgui
             }
             Event.LoadEvent((string)menuItem.Tag);
             UpdateHeatTable();
-            UpdateGridViews();
             if (Event.IsRaceActive)
             {
                 for (int i = 0; i < NumberOfDevices; i++)
@@ -1218,7 +1245,7 @@ namespace chorusgui
 
 
         #region Raceing
-         private void UpdateHeatTable()
+        private void UpdateHeatTable()
         {
             Heat.Clear();
             if (Event.CurrentHeat >= (int)Math.Ceiling((double)Event.pilots.Count / Event.NumberOfContendersForQualification) * Event.QualificationRaces)
@@ -1531,16 +1558,38 @@ namespace chorusgui
                     ii = 0;
                 }
             }
-            ComboBoxItem cbItem = (ComboBoxItem)cbElimination.SelectedItem;
-            switch (cbItem.Tag.ToString())
+            switch (Event.EliminationSystem)
             {
                 case "doubleout":
-                    BuildDoubleOutTable(); //TODO choose correct table
+                    BuildDoubleOutTable();
                     break;
                 case "singleout":
                 default:
-                    BuildSingleOutTable(); //TODO choose correct table
+                    BuildSingleOutTable();
                     break;
+            }
+            for (int k = 1; k < Event.races.Count; k++)
+            {
+                int j = k;
+                while (j > 0)
+                {
+                    int result;
+                    result = Event.races[j - 1].Heat - Event.races[j].Heat;
+                    if (result == 0)
+                        result = Event.races[j - 1].Device - Event.races[j].Device;
+
+                    if (result > 0)
+                    {
+                        var temp = Event.races[j - 1];
+                        Event.races[j - 1] = Event.races[j];
+                        Event.races[j] = temp;
+                        j--;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
             }
             UpdateHeatTable();
         }
@@ -1549,6 +1598,52 @@ namespace chorusgui
         {
             if (firstCall)
             {
+                List<Race> racehelper = new List<Race>();
+                foreach (Race race in Event.qualifications)
+                {
+                    racehelper.Add(race);
+                }
+                for (int i = 1; i < racehelper.Count; i++)
+                {
+                    int j = i;
+                    while (j > 0)
+                    {
+                        int result;
+                        if (Event.RaceMode)
+                        {
+                            //laps to finish
+                            result = InsertSort1(racehelper[j - 1], racehelper[j]);
+                        }
+                        else
+                        {
+                            //time to race
+                            result = InsertSort2(racehelper[j - 1], racehelper[j]);
+                        }
+
+                        if (result > 0)
+                        {
+                            var temp = racehelper[j - 1];
+                            racehelper[j - 1] = racehelper[j];
+                            racehelper[j] = temp;
+                            j--;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                }
+                for (int i = racehelper.Count - 1; i > 0; i--)
+                {
+                    for (int j = 0; j < i; j++)
+                    {
+                        if (racehelper[j].guid == racehelper[i].guid)
+                        {
+                            racehelper.RemoveAt(i);
+                            break;
+                        }
+                    }
+                }
                 //TODO: completly fill stage one of the elimination table
             }
             else
@@ -1573,5 +1668,15 @@ namespace chorusgui
             return race1.overtime - race2.overtime;
         }
         #endregion
+
+        private void cbElimination_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ComboBoxItem cbItem = (ComboBoxItem)cbElimination.SelectedItem;
+            Event.EliminationSystem = cbItem.Tag.ToString();
+            if (!Event.IsRaceActive)
+            {
+                BuildEventTables();
+            }
+        }
     }
 }

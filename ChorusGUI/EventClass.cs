@@ -19,6 +19,7 @@ namespace chorusgui
         public int CurrentHeat = 0;
         public Boolean IsRaceActive = false;
         public int NumberofTimeForHeat = 0;
+        public int Contenders=0;
 
         public PilotCollection pilots;
         public QualificationCollection qualifications;
@@ -72,6 +73,7 @@ namespace chorusgui
                             }
                             break;
                         case "eliminationsystem":
+                            gui.cbElimination.SelectedIndex = 1;
                             EliminationSystem = xmlNode.InnerText.ToLower();
                             foreach (ComboBoxItem item in gui.cbElimination.Items)
                             {
@@ -81,7 +83,6 @@ namespace chorusgui
                                     break;
                                 }
                             }
-                            gui.cbElimination.SelectedIndex = 1;
                             break;
                         case "racemode":
                             if (xmlNode.InnerText.ToLower() == "true")
@@ -134,6 +135,10 @@ namespace chorusgui
                         case "numberofcontendersforrace":
                             NumberOfContendersForRace = Int32.Parse(xmlNode.InnerText);
                             gui.contender_slider2.Value = NumberOfContendersForRace;
+                            break;
+                        case "contenders":
+                            Contenders = Int32.Parse(xmlNode.InnerText);
+                            gui.txtContenders.Text = Contenders.ToString();
                             break;
                         case "currentheat":
                             CurrentHeat = Int32.Parse(xmlNode.InnerText);
@@ -212,12 +217,20 @@ namespace chorusgui
                                     switch (xmlRace.Name.ToLower())
                                     {
                                         case "guid":
-                                            //TODO: keep in mind that we've got somekind of qualification table!!!
                                             race.guid = xmlRace.InnerText;
-                                            foreach (Pilot pilot in pilots)
+                                            if (race.guid[0] == '*')
                                             {
-                                                if (pilot.guid == race.guid)
-                                                    race.pilot = pilot;
+                                                //TODO: prettyfy names
+                                                race.pilot = new Pilot();
+                                                race.pilot.Name = race.guid;
+                                            }
+                                            else
+                                            {
+                                                foreach (Pilot pilot in pilots)
+                                                {
+                                                    if (pilot.guid == race.guid)
+                                                        race.pilot = pilot;
+                                                }
                                             }
                                             if (race.pilot == null)
                                             {
@@ -326,6 +339,11 @@ namespace chorusgui
             xmlItem.AppendChild(xmlText);
             rootNode.AppendChild(xmlItem);
 
+            xmlItem = xmlDoc.CreateElement("contenders");
+            xmlText = xmlDoc.CreateTextNode(this.Contenders.ToString());
+            xmlItem.AppendChild(xmlText);
+            rootNode.AppendChild(xmlItem);
+
             xmlItem = xmlDoc.CreateElement("currentheat");
             xmlText = xmlDoc.CreateTextNode(this.CurrentHeat.ToString());
             xmlItem.AppendChild(xmlText);
@@ -413,7 +431,7 @@ namespace chorusgui
                 xmlchild.AppendChild(xmlText);
                 xmlrace.AppendChild(xmlchild);
 
-                xmlchild = xmlDoc.CreateElement("head");
+                xmlchild = xmlDoc.CreateElement("heat");
                 xmlText = xmlDoc.CreateTextNode(race.Heat.ToString());
                 xmlchild.AppendChild(xmlText);
                 xmlrace.AppendChild(xmlchild);
