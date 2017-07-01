@@ -5,6 +5,7 @@
 //TODO: checkboxes for device calibrated dont always update?
 //TODO: maybe: delay pilot starts?
 //TODO: maybe: doubleclick or contextmenu for heat results in qualification or race datagrid
+//TODO: reset comboboxes for frequency and band after click to make sure its only updating if the module actually did accept the change!
 //TODO: search for TODO
 
 using System;
@@ -247,7 +248,7 @@ namespace chorusgui
                 {
                     if (Event.EliminationSystem != ((ComboBoxItem)cbElimination.SelectedItem).Tag.ToString())
                     {
-                        UpdateEventTables();
+                        BuildEventTables();
                     }
                 }
             }
@@ -256,10 +257,9 @@ namespace chorusgui
         {
             if (!Event.IsRaceActive)
             {
-                UpdateEventTables();
+                BuildEventTables();
             }
         }
-
 
         //WINDOW CLOSING
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -877,7 +877,7 @@ namespace chorusgui
                     contenders1.Text = e.NewValue.ToString();
                 }
                 Event.NumberOfContendersForQualification = Convert.ToInt32(e.NewValue);
-                UpdateEventTables();
+                BuildEventTables();
             }
         }
 
@@ -902,7 +902,7 @@ namespace chorusgui
                     }
                 }
                 QualificationRunsLabel.Content = Event.QualificationRaces;
-                UpdateEventTables();
+                BuildEventTables();
             }
         }
 
@@ -1218,50 +1218,12 @@ namespace chorusgui
 
 
         #region Raceing
-        public void UpdateEventTables()
-        {
-            //sanitycheck
-            if (Event.races == null)
-            {
-                return;
-            }
-            Event.qualifications.Clear();
-            Heat.Clear();
-            int i = 0, ii = 0;
-            for (int iii = 1; iii <= Event.QualificationRaces; iii++)
-            {
-                foreach (Pilot pilot in Event.pilots)
-                {
-                    Race race = new Race();
-                    race.lap.race = race;
-                    race.guid = pilot.guid;
-                    race.pilot = pilot;
-                    race.Heat = i;
-                    race.Device = ii;
-                    Event.qualifications.Add(race);
-                    ii++;
-                    if (ii == Event.NumberOfContendersForQualification)
-                    {
-                        ii = 0;
-                        i++;
-                    }
-                }
-                if (ii != 0)
-                {
-                    i++;
-                    ii = 0;
-                }
-            }
-            UpdateHeatTable();
-        }
-
-        private void UpdateHeatTable()
+         private void UpdateHeatTable()
         {
             Heat.Clear();
             if (Event.CurrentHeat >= (int)Math.Ceiling((double)Event.pilots.Count / Event.NumberOfContendersForQualification) * Event.QualificationRaces)
             {
                 labelCurrentHeat.Content = "Elimination Heat :" + Event.CurrentHeat;
-                tabControl1.SelectedIndex = 1;
                 foreach (Race race in Event.races)
                 {
                     if (race.Heat == Event.CurrentHeat)
@@ -1273,7 +1235,6 @@ namespace chorusgui
             else
             {
                 labelCurrentHeat.Content = "Qualification Heat :" + Event.CurrentHeat;
-                tabControl1.SelectedIndex = 0;
                 foreach (Race race in Event.qualifications)
                 {
                     if (race.Heat == Event.CurrentHeat)
@@ -1309,6 +1270,10 @@ namespace chorusgui
                 synthesizer.SpeakAsync("Race finished");
                 foreach (Race race in Heat)
                 {
+                    if (race.laps==null)
+                    {
+                        race.laps = "";
+                    }
                     CalculateResults(race);
                 }
                 UpdateGridViews();
@@ -1316,14 +1281,24 @@ namespace chorusgui
             else if (btnRace.Content.ToString() == "Verify Results")
             {
                 Event.CurrentHeat++;
-                if (Event.CurrentHeat == (int)Math.Ceiling((double)Event.pilots.Count / Event.NumberOfContendersForQualification) * Event.QualificationRaces)
-                {
-                    UpdateEliminationTable();
+                if (Event.CurrentHeat == (int)Math.Ceiling((double)Event.pilots.Count / Event.NumberOfContendersForQualification) * Event.QualificationRaces) {
                     tabControl1.SelectedIndex = 1; //select EliminationTab here
+                    UpdateEliminationTable(true);
                 }
-                //TODO check if race is over!
-                btnRace.Content = "Start Heat";
-                UpdateHeatTable();
+                if (Event.CurrentHeat > (int)Math.Ceiling((double)Event.pilots.Count / Event.NumberOfContendersForQualification) * Event.QualificationRaces)
+                {
+                    UpdateEliminationTable(false);
+                }
+                if (!Event.IsRaceComplete)
+                {
+                    btnRace.Content = "Start Heat";
+                    UpdateHeatTable();
+                }
+                else
+                {
+                    btnRace.Content = "Race Complete";
+                    btnRace.IsEnabled = false;
+                }
             }
         }
 
@@ -1520,115 +1495,67 @@ namespace chorusgui
                 CalculateResults(race);
                 UpdateGridViews();
             }
-
-        }
-        private void penis_Click(object sender, RoutedEventArgs e)
-        {
-            UpdateEliminationTable();
         }
 
-        private void UpdateEliminationTable()
+        public void BuildEventTables()
         {
-            List<Race> racehelper = new List<Race>();
-            foreach (Race race in Event.qualifications)
+            //sanitycheck
+            if (Event.races == null)
             {
-                racehelper.Add(race);
+                return;
             }
-            for (int i = 1; i < racehelper.Count; i++)
+            Event.qualifications.Clear();
+            Heat.Clear();
+            int i = 0, ii = 0;
+            for (int iii = 1; iii <= Event.QualificationRaces; iii++)
             {
-                int j = i;
-                while (j > 0)
+                foreach (Pilot pilot in Event.pilots)
                 {
-                    int result;
-                    if (Event.RaceMode)
+                    Race race = new Race();
+                    race.lap.race = race;
+                    race.guid = pilot.guid;
+                    race.pilot = pilot;
+                    race.Heat = i;
+                    race.Device = ii;
+                    Event.qualifications.Add(race);
+                    ii++;
+                    if (ii == Event.NumberOfContendersForQualification)
                     {
-                        //laps to finish
-                        result = InsertSort1(racehelper[j - 1], racehelper[j]);
-                    }
-                    else
-                    {
-                        //time to race
-                        result = InsertSort2(racehelper[j - 1], racehelper[j]);
-                    }
-
-                    if (result > 0)
-                    {
-                        var temp = racehelper[j - 1];
-                        racehelper[j - 1] = racehelper[j];
-                        racehelper[j] = temp;
-                        j--;
-                    }
-                    else
-                    {
-                        break;
+                        ii = 0;
+                        i++;
                     }
                 }
-            }
-            for (int i = racehelper.Count-1; i >0; i--)
-            {
-                for (int j = 0; j < i; j++)
+                if (ii != 0)
                 {
-                    if (racehelper[j].guid == racehelper[i].guid)
-                    {
-                        racehelper.RemoveAt(i);
-                        break;
-                    }
+                    i++;
+                    ii = 0;
                 }
             }
-            Event.races.Clear();
-            int heats = (int)Math.Ceiling((double)Event.pilots.Count / Event.NumberOfContendersForRace);
-            int heat=0;
-            int device=0;
-/*REMOVEME*/            Event.CurrentHeat = 10;
-            foreach (Race race in racehelper)
+            ComboBoxItem cbItem = (ComboBoxItem)cbElimination.SelectedItem;
+            switch (cbItem.Tag.ToString())
             {
-                Race newrace = new Race();
-                newrace.guid = race.guid;
-                newrace.pilot = race.pilot;
-                newrace.Device = device;
-                newrace.Heat = heat + Event.CurrentHeat;
-                Event.races.Add(newrace);
-                heat++;
-                if (heat==heats)
-                {
-                    device++;
-                    heat = 0;
-                }
+                case "doubleout":
+                    BuildDoubleOutTable(); //TODO choose correct table
+                    break;
+                case "singleout":
+                default:
+                    BuildSingleOutTable(); //TODO choose correct table
+                    break;
             }
-            //TODO BUILD TREE!!!
-            //TODO build elemination table
-            heat = heats;
-            int pilots = racehelper.Count;
-            int winners;
-            int winnersheat = heats;
-            int loosers;
-            int loosersheat = heats;
-            int newwinnerheats;
-            int newlooserheats;
+            UpdateHeatTable();
+        }
 
+        private void UpdateEliminationTable(Boolean firstCall)
+        {
+            if (firstCall)
             {
-                winners = heats * Event.NumberOfContendersForRace / 2;
-                newwinnerheats = (int)Math.Ceiling((double)winners / Event.NumberOfContendersForRace);
-                loosers = pilots - winners;
-                newlooserheats = (int)Math.Ceiling((double)loosers / Event.NumberOfContendersForRace);
-                //TODO
-
+                //TODO: completly fill stage one of the elimination table
             }
-            /*
-            for (int i=0;i< count*2;i++)
+            else
             {
-                Race newrace = new Race();
-                newrace.Heat = heat + Event.CurrentHeat + i;
-                newrace.Device = device;
-                newrace.pilot = new Pilot();
-                newrace.pilot.Name = "Winner Heat " + (Event.CurrentHeat + i);
-                newrace.pilot.guid = "*" + newrace.pilot.Name;
-
-                Event.races.Add(newrace);
+                //TODO: fill results from last heat to elimination table
             }
-            */
             UpdateGridViews();
-            //TODO: sort eliminationgridview by heat + device!
         }
         
         private int InsertSort1(Race race1, Race race2)

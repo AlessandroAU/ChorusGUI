@@ -212,6 +212,7 @@ namespace chorusgui
                                     switch (xmlRace.Name.ToLower())
                                     {
                                         case "guid":
+                                            //TODO: keep in mind that we've got somekind of qualification table!!!
                                             race.guid = xmlRace.InnerText;
                                             foreach (Pilot pilot in pilots)
                                             {
@@ -241,7 +242,7 @@ namespace chorusgui
                     }
                 }
                 gui.UpdateRecentFileList(filename);
-                gui.UpdateEventTables();
+                gui.BuildEventTables();
             }
             catch (Exception ex)
             {

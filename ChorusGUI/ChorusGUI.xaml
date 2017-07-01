@@ -40,7 +40,6 @@
             <TabItem Header="Race">
                 <Grid>
                     <Button x:Name="btnRace" Content="Start Heat" Margin="10,10,583,0" VerticalAlignment="Top" Click="button_Click"/>
-                    <Button x:Name="btnPenis" Content="Penis generation" Margin="280,10,233,0" VerticalAlignment="Top" Click="penis_Click"/>
                     <DataGrid x:Name="dgCurrentHeat" Height="200" Margin="10,60,10,0" ItemsSource="{Binding Source={StaticResource HeatCollectionViewSource}}" VerticalAlignment="Top" CanUserAddRows="False" AutoGenerateColumns="false" SelectionUnit="Cell" SelectionMode="Single" CanUserDeleteRows="False" SelectedCellsChanged="dgCurrentHeat_SelectedCellsChanged">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="RF-Channel" IsReadOnly="True" Binding="{Binding Path=RFChannel}" SortDirection="Ascending"/>
@@ -78,7 +77,7 @@
                                         </mc:AlternateContent>
                                         <DataGridTextColumn Header="RF-Channel" IsReadOnly="True" Binding="{Binding Path=RFChannel}"/>
                                         <DataGridTextColumn Header="Result" IsReadOnly="True" Binding="{Binding Path=Result}"/>
-                                        <DataGridTextColumn Header="Best Lap" IsReadOnly="True" Binding="{Binding Path=BestLap}"/>
+                                        <DataGridTextColumn Header="Best Lap in Heat" IsReadOnly="True" Binding="{Binding Path=BestLap}"/>
                                     </DataGrid.Columns>
                                 </DataGrid>
                             </Grid>
