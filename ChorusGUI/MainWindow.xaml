@@ -18,6 +18,7 @@
                 <ComboBoxItem Content="9600 Baud" IsSelected="True" />
                 <ComboBoxItem Content="19200 Baud" />
                 <ComboBoxItem Content="38400 Baud" />
+                <ComboBoxItem Content="57600 Baud" />
                 <ComboBoxItem Content="76800 Baud" />
                 <ComboBoxItem Content="115200 Baud" />
             </ComboBox>

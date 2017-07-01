@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Xml;
+using System.Windows.Controls;
 
 namespace chorusgui
 {
@@ -10,7 +11,7 @@ namespace chorusgui
         public int MinimalLapTime = 5;
         public int TimeToPrepare = 5;
         public Boolean SkipFirstLap = true;
-        public Boolean DoubleOut = true;
+        public string EliminationSystem;
         public Boolean RaceMode = true;
         public int NumberOfContendersForQualification = 2;
         public int QualificationRaces = 1;
@@ -70,17 +71,17 @@ namespace chorusgui
                                 IsRaceComplete = false;
                             }
                             break;
-                        case "doubleout":
-                            if (xmlNode.InnerText.ToLower() == "true")
+                        case "eliminationsystem":
+                            EliminationSystem = xmlNode.InnerText.ToLower();
+                            foreach (ComboBoxItem item in gui.cbElimination.Items)
                             {
-                                DoubleOut = true;
-                                gui.cbDoubleOut.IsChecked = true;
+                                if (item.Tag.Equals(EliminationSystem))
+                                {
+                                    gui.cbElimination.SelectedItem = item;
+                                    break;
+                                }
                             }
-                            else
-                            {
-                                DoubleOut = false;
-                                gui.cbDoubleOut.IsChecked = false;
-                            }
+                            gui.cbElimination.SelectedIndex = 1;
                             break;
                         case "racemode":
                             if (xmlNode.InnerText.ToLower() == "true")
@@ -179,12 +180,12 @@ namespace chorusgui
                                             foreach (Pilot pilot in pilots)
                                             {
                                                 if (pilot.guid == race.guid)
+                                                {
                                                     race.pilot = pilot;
+                                                    break;
+                                                }
                                             }
-                                            if (race.pilot == null)
-                                            {
-                                                //TODO: WTF???
-                                            }
+                                            //TODO: WTF???
                                             break;
                                         case "heat":
                                             race.Heat = Int32.Parse(xmlRace.InnerText);
@@ -240,6 +241,7 @@ namespace chorusgui
                     }
                 }
                 gui.UpdateRecentFileList(filename);
+                gui.UpdateEventTables();
             }
             catch (Exception ex)
             {
@@ -273,8 +275,8 @@ namespace chorusgui
             xmlItem.AppendChild(xmlText);
             rootNode.AppendChild(xmlItem);
 
-            xmlItem = xmlDoc.CreateElement("doubleout");
-            xmlText = xmlDoc.CreateTextNode(this.DoubleOut.ToString());
+            xmlItem = xmlDoc.CreateElement("eliminationsystem");
+            xmlText = xmlDoc.CreateTextNode(this.EliminationSystem);
             xmlItem.AppendChild(xmlText);
             rootNode.AppendChild(xmlItem);
 

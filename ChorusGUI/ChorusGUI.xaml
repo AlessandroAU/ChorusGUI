@@ -40,6 +40,7 @@
             <TabItem Header="Race">
                 <Grid>
                     <Button x:Name="btnRace" Content="Start Heat" Margin="10,10,583,0" VerticalAlignment="Top" Click="button_Click"/>
+                    <Button x:Name="btnPenis" Content="Penis generation" Margin="280,10,233,0" VerticalAlignment="Top" Click="penis_Click"/>
                     <DataGrid x:Name="dgCurrentHeat" Height="200" Margin="10,60,10,0" ItemsSource="{Binding Source={StaticResource HeatCollectionViewSource}}" VerticalAlignment="Top" CanUserAddRows="False" AutoGenerateColumns="false" SelectionUnit="Cell" SelectionMode="Single" CanUserDeleteRows="False" SelectedCellsChanged="dgCurrentHeat_SelectedCellsChanged">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="RF-Channel" IsReadOnly="True" Binding="{Binding Path=RFChannel}" SortDirection="Ascending"/>
@@ -84,7 +85,7 @@
                         </TabItem>
                         <TabItem Header="Elimination Phase">
                             <Grid>
-                                <DataGrid x:Name="dgElemination" Margin="10" IsReadOnly="True">
+                                <DataGrid x:Name="dgElemination" Margin="10" ItemsSource="{Binding Source={StaticResource RaceCollectionViewSource}}" IsReadOnly="True" AutoGenerateColumns="false">
                                     <DataGrid.Columns>
                                         <DataGridTextColumn Header="Heat" IsReadOnly="True" Binding="{Binding Path=Heat}" SortDirection="Ascending"/>
                                         <DataGridTextColumn Header="Pilot Name" Binding="{Binding Path=pilot.Name}"/>
@@ -108,7 +109,7 @@
             </TabItem>
             <TabItem Header="Pilots">
                 <Grid>
-                    <DataGrid x:Name="Pilots_dataGrid" Margin="10" ItemsSource="{Binding Source={StaticResource PilotCollectionViewSource}}" AutoGenerateColumns="False" CellEditEnding="Pilots_dataGrid_CellEditEnding">
+                    <DataGrid x:Name="Pilots_dataGrid" Margin="10" ItemsSource="{Binding Source={StaticResource PilotCollectionViewSource}}" AutoGenerateColumns="False">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Pilot Name" Binding="{Binding Path=Name}"/>
                             <DataGridTextColumn Header="Ranking" IsReadOnly="True" Binding="{Binding Path=Ranking}"/>
@@ -150,7 +151,10 @@
 
                             <Separator Height="12" Margin="13,174,7,0" VerticalAlignment="Top" RenderTransformOrigin="0.493,-2.983"/>
                             <CheckBox x:Name="cbSkipFirstLap" Content="Skip First Lap" HorizontalAlignment="Left" Margin="13,191,0,0" VerticalAlignment="Top" Click="SkipFirstLap_CLick" IsChecked="True"/>
-                            <CheckBox x:Name="cbDoubleOut" Content="Elemination phase with Double Out" HorizontalAlignment="Left" Margin="184,191,0,0" VerticalAlignment="Top" IsChecked="True" Click="DoubleOut_Click"/>
+                            <ComboBox x:Name="cbElimination" HorizontalAlignment="Left" Margin="184,188,0,0" VerticalAlignment="Top" Width="147" SelectedIndex="1">
+                                <ComboBoxItem Content="Single Out" Tag="singleout" HorizontalAlignment="Left" Width="145"/>
+                                <ComboBoxItem Content="Double Out" Tag="doubleout" HorizontalAlignment="Left" Width="145"/>
+                            </ComboBox>
 
                             <Separator Height="12" Margin="13,212,7,0" VerticalAlignment="Top" RenderTransformOrigin="0.493,-2.983"/>
                             <Label x:Name="label3" Content="Number of Contenders for qualification run:" HorizontalAlignment="Left" Margin="10,227,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.575,-1.251"/>
@@ -164,21 +168,47 @@
                             <Button x:Name="IncQualificationRuns" Content="+" HorizontalAlignment="Left" Margin="303,304,0,0" VerticalAlignment="Top" Width="28" Click="btn_QualificationRuns"/>
 
                             <Separator Height="12" Margin="13,329,7,0" VerticalAlignment="Top" RenderTransformOrigin="0.493,-2.983"/>
-                            <Label x:Name="label5" Content="Number of Contenders for elemination run:" HorizontalAlignment="Left" Margin="10,346,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.575,-1.251"/>
+                            <Label x:Name="label5" Content="Number of Contenders for elimination run:" HorizontalAlignment="Left" Margin="10,346,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.575,-1.251"/>
                             <TextBox x:Name="contenders2" HorizontalAlignment="Left" Height="23" Margin="277,348,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="54" IsEnabled="False" Text="0"/>
                             <Slider x:Name="contender_slider2" Margin="13,367,7,0" VerticalAlignment="Top" TickPlacement="Both" Maximum="8" SmallChange="1" IsSnapToTickEnabled="True" Ticks="0,2,4,6,8" ValueChanged="contender_slider2_ValueChanged"/>
 
                             <Separator Height="12" Margin="13,398,7,0" VerticalAlignment="Top" RenderTransformOrigin="0.493,-2.983"/>
-                            <CheckBox x:Name="cbEnableVoltageMonitoring" Content="Enable Voltage Monitoring for Device" HorizontalAlignment="Left" Margin="12,415,0,0" VerticalAlignment="Top" Click="VoltageMonitoring_CLick" />
-                            <ComboBox x:Name="cbVoltageMonitoring" HorizontalAlignment="Left" Margin="266,413,0,0" VerticalAlignment="Top" Width="204" IsEnabled="False" SelectionChanged="cbVoltageMonitoring_SelChange"/>
+                            <Label x:Name="label7" Content="Number of Contenders for Elimination Phase:" HorizontalAlignment="Left" Margin="13,415,0,0" VerticalAlignment="Top"/>
+                            <TextBox x:Name="txtcontenders" HorizontalAlignment="Left" Height="23" Margin="277,417,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="54" Text="0" TextChanged="txtRaceMode_TextChanged"/>
                         </Grid>
                     </TabItem>
-                    <TabItem Header="Sounds" FontWeight="Bold">
-                        <Grid x:Name="SoundSettingsGrid">
+                    <TabItem Header="App Settings" FontWeight="Bold">
+                        <Grid x:Name="AppSettingsGrid">
                             <ComboBox x:Name="cbSpeechVoice" HorizontalAlignment="Left" Margin="149,53,0,0" VerticalAlignment="Top" Width="385" SelectionChanged="cbSpeechVoice_SelectionChanged"/>
+
+                            <CheckBox x:Name="cbEnableVoltageMonitoring" Content="Enable Voltage Monitoring for Device" HorizontalAlignment="Left" Margin="238,266,0,0" VerticalAlignment="Top" Click="VoltageMonitoring_CLick" />
+                            <ComboBox x:Name="cbVoltageMonitoring" HorizontalAlignment="Left" Margin="255,286,0,0" VerticalAlignment="Top" Width="204" IsEnabled="False" SelectionChanged="cbVoltageMonitoring_SelChange"/>
+                            <RadioButton x:Name="radioButton1" Content="RadioButton" HorizontalAlignment="Left" Margin="426,206,0,0" VerticalAlignment="Top"/>
+                            <RadioButton x:Name="radioButton2" Content="RadioButton" HorizontalAlignment="Left" Margin="167,166,0,0" VerticalAlignment="Top"/>
+                            <RadioButton x:Name="radioButton3" Content="RadioButton" HorizontalAlignment="Left" Margin="426,186,0,0" VerticalAlignment="Top"/>
+                            <RadioButton x:Name="radioButton4" Content="RadioButton" HorizontalAlignment="Left" Margin="167,186,0,0" VerticalAlignment="Top"/>
+                            <RadioButton x:Name="radioButton5" Content="RadioButton" HorizontalAlignment="Left" Margin="426,166,0,0" VerticalAlignment="Top"/>
+                            <RadioButton x:Name="radioButton6" Content="RadioButton" HorizontalAlignment="Left" Margin="167,146,0,0" VerticalAlignment="Top"/>
+                            <RadioButton x:Name="radioButton7" Content="RadioButton" HorizontalAlignment="Left" Margin="426,146,0,0" VerticalAlignment="Top"/>
+                            <RadioButton x:Name="radioButton8" Content="RadioButton" HorizontalAlignment="Left" Margin="217,126,0,0" VerticalAlignment="Top"/>
+                            <RadioButton x:Name="radioButton9" Content="RadioButton" HorizontalAlignment="Left" Margin="380,126,0,0" VerticalAlignment="Top"/>
+                            <RadioButton x:Name="radioButton10" Content="RadioButton" HorizontalAlignment="Left" Margin="298,105,0,0" VerticalAlignment="Top"/>
+
+
+                            <RadioButton x:Name="radioButton11" Content="RadioButton" HorizontalAlignment="Left" Margin="298,85,0,0" VerticalAlignment="Top"/>
+                            <RadioButton x:Name="radioButton12" Content="RadioButton" HorizontalAlignment="Left" Margin="38,85,0,0" VerticalAlignment="Top"/>
+                            <RadioButton x:Name="radioButton13" Content="RadioButton" HorizontalAlignment="Left" Margin="564,85,0,0" VerticalAlignment="Top"/>
+                            <RadioButton x:Name="radioButton14" Content="RadioButton" HorizontalAlignment="Left" Margin="125,106,0,0" VerticalAlignment="Top"/>
+                            <RadioButton x:Name="radioButton15" Content="RadioButton" HorizontalAlignment="Left" Margin="472,106,0,0" VerticalAlignment="Top"/>
+                            <RadioButton x:Name="radioButton16" Content="RadioButton" HorizontalAlignment="Left" Margin="298,246,0,0" VerticalAlignment="Top"/>
+                            <RadioButton x:Name="radioButton17" Content="RadioButton" HorizontalAlignment="Left" Margin="217,226,0,0" VerticalAlignment="Top"/>
+                            <RadioButton x:Name="radioButton18" Content="RadioButton" HorizontalAlignment="Left" Margin="380,226,0,0" VerticalAlignment="Top"/>
+                            <RadioButton x:Name="radioButton19" Content="RadioButton" HorizontalAlignment="Left" Margin="167,206,0,0" VerticalAlignment="Top"/>
+
 
                         </Grid>
                     </TabItem>
+                    
                 </TabControl>
             </TabItem>
             <TabItem Header="Debug" HorizontalAlignment="Left" Height="20" VerticalAlignment="Top" Width="54">
