@@ -134,7 +134,7 @@
                             <Separator Height="12" Margin="9,41,11,0" VerticalAlignment="Top" RenderTransformOrigin="0.493,-2.983"/>
                             <RadioButton x:Name="cbRaceMode1" Content="Laps to Finish" HorizontalAlignment="Left" Margin="12,58,0,0" VerticalAlignment="Top" Checked="RaceMode_Checked"/>
                             <TextBox x:Name="txtRaceMode" HorizontalAlignment="Left" Height="23" Margin="121,55,0,0" TextWrapping="Wrap" Text="120" VerticalAlignment="Top" Width="45" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" TextChanged="txtRaceMode_TextChanged"/>
-                            <RadioButton x:Name="cbRaceMode2" Content="Time to Race + Overtime (in seconds)" HorizontalAlignment="Left" Margin="183,58,0,0" VerticalAlignment="Top" IsChecked="True" Checked="RaceMode_Checked"/>
+                            <RadioButton x:Name="cbRaceMode2" Content="Time to Race + Overtime" HorizontalAlignment="Left" Margin="183,58,0,0" VerticalAlignment="Top" IsChecked="True" Checked="RaceMode_Checked"/>
 
                             <Separator Height="12" Margin="10,83,10,0" VerticalAlignment="Top" RenderTransformOrigin="0.493,-2.983"/>
                             <Label x:Name="label1" Content="Minimal Lap Time" HorizontalAlignment="Left" Margin="9,100,0,0" VerticalAlignment="Top"/>
@@ -165,6 +165,11 @@
                             <Button x:Name="DecQualificationRuns" Content="-" HorizontalAlignment="Left" Margin="183,304,0,0" VerticalAlignment="Top" Width="28" Click="btn_QualificationRuns"/>
                             <Label x:Name="QualificationRunsLabel" Content="3" HorizontalAlignment="Left" Margin="248,301,0,0" VerticalAlignment="Top" HorizontalContentAlignment="Center"/>
                             <Button x:Name="IncQualificationRuns" Content="+" HorizontalAlignment="Left" Margin="303,304,0,0" VerticalAlignment="Top" Width="28" Click="btn_QualificationRuns"/>
+                            <ComboBox x:Name="cbQualificationAddResults" HorizontalAlignment="Left" Margin="370,303,0,0" VerticalAlignment="Top" Width="147" SelectedIndex="0" SelectionChanged="cbQualificationAddResults_SelectionChanged">
+                                <ComboBoxItem Content="Best out of One" Tag="bestrun" HorizontalAlignment="Left" Width="145"/>
+                                <ComboBoxItem Content="Best out of 2" Tag="bestoftwo" HorizontalAlignment="Left" Width="145"/>
+                                <ComboBoxItem Content="Best out of all" Tag="betofall" HorizontalAlignment="Left" Width="145"/>
+                            </ComboBox>
 
                             <Separator Height="12" Margin="13,329,7,0" VerticalAlignment="Top" RenderTransformOrigin="0.493,-2.983"/>
                             <Label x:Name="label5" Content="Number of Contenders for elimination run:" HorizontalAlignment="Left" Margin="10,346,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.575,-1.251"/>

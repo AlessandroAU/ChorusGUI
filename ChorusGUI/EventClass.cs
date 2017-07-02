@@ -20,6 +20,7 @@ namespace chorusgui
         public Boolean IsRaceActive = false;
         public int NumberofTimeForHeat = 0;
         public int Contenders=0;
+        public string QualificationAddResults;
 
         public PilotCollection pilots;
         public QualificationCollection qualifications;
@@ -96,6 +97,18 @@ namespace chorusgui
                                 RaceMode = false;
                                 gui.cbRaceMode1.IsChecked = false;
                                 gui.cbRaceMode2.IsChecked = true;
+                            }
+                            break;
+                        case "qualificationaddresults":
+                            QualificationAddResults = xmlNode.InnerText.ToLower();
+                            gui.cbQualificationAddResults.SelectedIndex = 0;
+                            foreach (ComboBoxItem item in gui.cbQualificationAddResults.Items)
+                            {
+                                if (item.Tag.Equals(QualificationAddResults))
+                                {
+                                    gui.cbQualificationAddResults.SelectedItem = item;
+                                    break;
+                                }
                             }
                             break;
                         case "israceactive":
@@ -306,6 +319,11 @@ namespace chorusgui
 
             xmlItem = xmlDoc.CreateElement("israceactive");
             xmlText = xmlDoc.CreateTextNode(this.IsRaceActive.ToString());
+            xmlItem.AppendChild(xmlText);
+            rootNode.AppendChild(xmlItem);
+
+            xmlItem = xmlDoc.CreateElement("qualificationaddresults");
+            xmlText = xmlDoc.CreateTextNode(this.QualificationAddResults);
             xmlItem.AppendChild(xmlText);
             rootNode.AppendChild(xmlItem);
 
