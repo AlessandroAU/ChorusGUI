@@ -183,6 +183,8 @@
                     </TabItem>
                     <TabItem Header="App Settings" FontWeight="Bold">
                         <Grid x:Name="AppSettingsGrid">
+                            
+                            
                             <ComboBox x:Name="cbSpeechVoice" HorizontalAlignment="Left" Margin="149,53,0,0" VerticalAlignment="Top" Width="385" SelectionChanged="cbSpeechVoice_SelectionChanged"/>
 
                             <CheckBox x:Name="cbEnableVoltageMonitoring" Content="Enable Voltage Monitoring for Device" HorizontalAlignment="Left" Margin="238,266,0,0" VerticalAlignment="Top" Click="VoltageMonitoring_CLick" />
@@ -208,6 +210,10 @@
                             <RadioButton x:Name="radioButton17" Content="RadioButton" HorizontalAlignment="Left" Margin="217,226,0,0" VerticalAlignment="Top"/>
                             <RadioButton x:Name="radioButton18" Content="RadioButton" HorizontalAlignment="Left" Margin="380,226,0,0" VerticalAlignment="Top"/>
                             <RadioButton x:Name="radioButton19" Content="RadioButton" HorizontalAlignment="Left" Margin="167,206,0,0" VerticalAlignment="Top"/>
+
+                            <Label x:Name="label" Content="Frequency:" HorizontalAlignment="Left" Margin="20,24,0,0" VerticalAlignment="Top"/>
+                            <TextBox x:Name="txt_freq" HorizontalAlignment="Left" Height="23" Margin="120,24,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120" TextChanged="txt_freq_TextChanged"/>
+                            <Label x:Name="label_freq" Content="0" HorizontalAlignment="Left" Margin="270,24,0,0" VerticalAlignment="Top"/>
 
 
                         </Grid>

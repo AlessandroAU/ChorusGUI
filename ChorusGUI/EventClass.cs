@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Xml;
 using System.Windows.Controls;
+using System.Windows;
 
 namespace chorusgui
 {
@@ -272,6 +273,7 @@ namespace chorusgui
             }
             catch (Exception ex)
             {
+                MessageBox.Show(ex.ToString(), "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             return true;
         }
