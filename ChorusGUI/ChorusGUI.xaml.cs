@@ -1,7 +1,6 @@
 ﻿//TODO: code weirdo racing system
 //TODO: verify amount of needed devices!
 //TODO: race countdown
-//TODO: reset comboboxes for frequency and band after click to make sure its only updating if the module actually did accept the change!
 //TODO: qualification choose between best run or best of all
 //TODO: maybe: delay pilot starts?
 //TODO: maybe: doubleclick or contextmenu for heat results in qualification or race datagrid
@@ -75,7 +74,7 @@ namespace chorusgui
         public int CurrentRSSIValue;
         public Label CurrentRSSIValueLabel;
         public int CurrentTreshold;
-        public Label CurrentTresholdLabel;
+        public TextBox CurrentTresholdTextBox;
         public CheckBox RSSIMonitoringActive;
         public ListView LapTimes;
         public double CurrentVoltage;
@@ -232,9 +231,13 @@ namespace chorusgui
                 if (settings.RecentFiles.Count == 0)
                 {
                     settings.RecentFiles.Add("currentevent.xml");
+                    UpdateRecentFileList("");
                 }
-                UpdateRecentFileList("");
-                Event.LoadEvent(settings.RecentFiles[0]);
+                else
+                {
+                    UpdateRecentFileList("");
+                    Event.LoadEvent(settings.RecentFiles[0]);
+                }
                 Title = "Chorus Lap Timer @ " + settings.SerialPortName + "(" + settings.SerialBaud + " Baud) -=] " + Event.name + " [=-";
                 aTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
                 VoltageMonitorTimer.Elapsed += new ElapsedEventHandler(VoltageMonitorTimerEvent);
@@ -527,11 +530,23 @@ namespace chorusgui
                                 ChorusDevices[ii].CurrentRSSIValueLabel = label;
 
                                 label = new Label();
-                                label.Content = "Current RSSI Treshold: 0";
+                                label.Content = "Current RSSI Treshold:";
                                 label.Name = "ID" + ii + "T";
                                 label.Margin = new Thickness(10, 132, 0, 0);
                                 grid.Children.Add(label);
-                                ChorusDevices[ii].CurrentTresholdLabel = label;
+
+                                TextBox textbox = new TextBox();
+                                textbox.Name = "ID" + ii + "Tb";
+                                textbox.Margin = new Thickness(135, 135, 0, 0);
+                                textbox.HorizontalAlignment = HorizontalAlignment.Left;
+                                textbox.VerticalAlignment = VerticalAlignment.Top;
+                                textbox.TextWrapping = TextWrapping.NoWrap;
+                                textbox.MaxLines = 1;
+                                textbox.Height = 20;
+                                textbox.Width = 60;
+                                textbox.TextChanged += txt_RssiTreshold_TextChanged;
+                                grid.Children.Add(textbox);
+                                ChorusDevices[ii].CurrentTresholdTextBox = textbox;
 
                                 Button button = new Button();
                                 button.Name = "ID" + ii + "Td";
@@ -546,7 +561,7 @@ namespace chorusgui
 
                                 button = new Button();
                                 button.Name = "ID" + ii + "Ts";
-                                button.Content = "Set";
+                                button.Content = "Current";
                                 button.Margin = new Thickness(230, 135, 0, 0);
                                 button.Height = 20;
                                 button.Width = 50;
@@ -664,6 +679,9 @@ namespace chorusgui
                                         ChorusDevices[device].Channel.SelectedIndex = readbuffer[3] - '0';
                                     }
                                     break;
+                                case 'O': //set frequency
+                                    //TODO: set frequency
+                                    break;
                                 case 'D': //Sound State (half-byte; 1 = On, 0 = Off)
                                     if (readbuffer[3] == '0')
                                     {
@@ -748,7 +766,7 @@ namespace chorusgui
                                     break;
                                 case 'T': //Current Threshold (2 bytes)
                                     ChorusDevices[device].CurrentTreshold = int.Parse(readbuffer.Substring(3), System.Globalization.NumberStyles.HexNumber);
-                                    ChorusDevices[device].CurrentTresholdLabel.Content = "Current RSSI Treshold: " + ChorusDevices[device].CurrentTreshold;
+                                    ChorusDevices[device].CurrentTresholdTextBox.Text = ChorusDevices[device].CurrentTreshold.ToString(); ;
                                     break;
                                 case 'V': //RSSI Monitor State (half-byte; 1 = On, 0 = Off)
                                     if (readbuffer[3] == '0')
@@ -959,7 +977,7 @@ namespace chorusgui
                 }
                 else if (button.Name[0] == 'I')
                 {
-                    if (Event.QualificationRaces < 10)
+                    if (Event.QualificationRaces < 100)
                     {
                         Event.QualificationRaces++;
                     }
@@ -1186,7 +1204,9 @@ namespace chorusgui
             }
             Pilots_dataGrid.IsEnabled = true;
             RaceSettingsGrid.IsEnabled = true;
+            btnRace.Content = "Start Heat";
             UpdateHeatTable();
+            UpdateRecentFileList("newevent-"+ ((Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds).ToString("X") +".xml");
         }
 
         private void txtEventName_TextChanged(object sender, TextChangedEventArgs e)
@@ -1389,6 +1409,7 @@ namespace chorusgui
                     btnRace.Content = "Race Complete";
                     btnRace.IsEnabled = false;
                 }
+                Event.SaveEvent(settings.RecentFiles[0]);
             }
         }
 
@@ -1760,6 +1781,21 @@ namespace chorusgui
 
         #endregion
 
+        void txt_RssiTreshold_TextChanged(object sender, TextChangedEventArgs e) 
+        {
+            int value;
+            TextBox textbox = (TextBox)sender;
+            var device = textbox.Name[2] - '0';
+            try
+            {
+                value = Convert.ToInt32(textbox.Text);
+                SendData("R" + device + "S" + value.ToString("X4"));
+            }
+            catch (Exception)
+            {
+
+            }
+        }
 
         void txt_freq_TextChanged(object sender, TextChangedEventArgs e) /*betatesting this gay function*/
         {
