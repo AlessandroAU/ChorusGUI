@@ -24,14 +24,8 @@ using System.Runtime.InteropServices;
 
 namespace chorusgui
 {
-    /// <summary>
-    /// Interaction logic for ChorusGUI.xaml
-    /// </summary>
-    /// 
-
     internal static class NativeMethods
     {
-        // Import SetThreadExecutionState Win32 API and necessary flags
         [DllImport("kernel32.dll")]
         public static extern uint SetThreadExecutionState(uint esFlags);
         public const uint ES_CONTINUOUS = 0x80000000;
@@ -960,7 +954,7 @@ namespace chorusgui
                 {
                     contenders1.Text = e.NewValue.ToString();
                 }
-                if ((NumberOfDevices < Event.NumberOfContendersForQualification) || (NumberOfDevices < Event.NumberOfContendersForRace))
+                if ((NumberOfDevices > 0) && ((NumberOfDevices < Event.NumberOfContendersForQualification) || (NumberOfDevices < Event.NumberOfContendersForRace)))
                 {
                     btnRace.IsEnabled = false;
                     MessageBox.Show("You dont have enough Devices to continue this event", "WARNING", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -1007,7 +1001,7 @@ namespace chorusgui
                 contenders2.Text = e.NewValue.ToString();
             }
             Event.NumberOfContendersForRace = Convert.ToInt32(e.NewValue);
-            if ((NumberOfDevices < Event.NumberOfContendersForQualification) || (NumberOfDevices < Event.NumberOfContendersForRace))
+            if ((NumberOfDevices > 0) && ((NumberOfDevices < Event.NumberOfContendersForQualification) || (NumberOfDevices < Event.NumberOfContendersForRace)))
             {
                 btnRace.IsEnabled = false;
                 MessageBox.Show("You dont have enough Devices to continue this event", "WARNING", MessageBoxButton.OK, MessageBoxImage.Warning);
