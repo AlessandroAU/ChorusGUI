@@ -1,7 +1,6 @@
 ﻿//TODO: code weirdo racing system
-//TODO: verify amount of needed devices!
-//TODO: race countdown
 //TODO: qualification choose between best run or best of all
+//TODO: race countdown
 //TODO: maybe: delay pilot starts?
 //TODO: maybe: doubleclick or contextmenu for heat results in qualification or race datagrid
 //TODO: search for TODO
@@ -198,7 +197,7 @@ namespace chorusgui
         public SerialPort mySerialPort;
         int TimerCalibration = 1000;
         private SpeechSynthesizer synthesizer;
-        int NumberOfDevices;
+        public int NumberOfDevices;
         private uint m_previousExecutionState;
 
         EventClass Event;
@@ -399,10 +398,14 @@ namespace chorusgui
                             {
                                 break;
                             }
-                            if ((Event.IsRaceActive) && (NumberOfDevices < Event.NumberOfContendersForQualification) && (NumberOfDevices < Event.NumberOfContendersForRace))
+                            if ((NumberOfDevices < Event.NumberOfContendersForQualification) || (NumberOfDevices < Event.NumberOfContendersForRace))
                             {
-                                //TODO: mess with this shit
-                                MessageBox.Show("BIIIIIIIIIIIIG PROBLEM. The active Event needs more devices!", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+                                btnRace.IsEnabled = false;
+                                MessageBox.Show("You dont have enough Devices to continue this event", "WARNING", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            }
+                            else
+                            {
+                                btnRace.IsEnabled = true;
                             }
                             contender_slider1.Maximum = NumberOfDevices;
                             contender_slider2.Maximum = NumberOfDevices;
@@ -957,6 +960,15 @@ namespace chorusgui
                 {
                     contenders1.Text = e.NewValue.ToString();
                 }
+                if ((NumberOfDevices < Event.NumberOfContendersForQualification) || (NumberOfDevices < Event.NumberOfContendersForRace))
+                {
+                    btnRace.IsEnabled = false;
+                    MessageBox.Show("You dont have enough Devices to continue this event", "WARNING", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+                else
+                {
+                    btnRace.IsEnabled = true;
+                }
                 Event.NumberOfContendersForQualification = Convert.ToInt32(e.NewValue);
                 BuildEventTables();
             }
@@ -995,6 +1007,15 @@ namespace chorusgui
                 contenders2.Text = e.NewValue.ToString();
             }
             Event.NumberOfContendersForRace = Convert.ToInt32(e.NewValue);
+            if ((NumberOfDevices < Event.NumberOfContendersForQualification) || (NumberOfDevices < Event.NumberOfContendersForRace))
+            {
+                btnRace.IsEnabled = false;
+                MessageBox.Show("You dont have enough Devices to continue this event", "WARNING", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+            else
+            {
+                btnRace.IsEnabled = true;
+            }
         }
 
         //ENABLE VOLTAGE MONITORING
@@ -1796,32 +1817,5 @@ namespace chorusgui
 
             }
         }
-
-        void txt_freq_TextChanged(object sender, TextChangedEventArgs e) /*betatesting this gay function*/
-        {
-            int value;
-            try
-            {
-                value = Convert.ToInt32(txt_freq.Text);
-            }
-            catch (FormatException)
-            {
-                value = 0;
-            }
-            if (value < 4000)
-                return;
-            if (value > 6000)
-                return;
-
-            value = value - 479;
-            value /= 2;
-
-            int bla = value % 32;
-            value /= 32;
-            value = (value << 7) + bla;
-
-            label_freq.Content = value.ToString("X4");
-        }
-
     }
 }

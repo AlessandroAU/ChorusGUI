@@ -14,9 +14,9 @@ namespace chorusgui
         public Boolean SkipFirstLap = true;
         public string EliminationSystem;
         public Boolean RaceMode = true;
-        public int NumberOfContendersForQualification = 2;
-        public int QualificationRaces = 1;
-        public int NumberOfContendersForRace = 2;
+        public int NumberOfContendersForQualification = 1;
+        public int QualificationRaces = 3;
+        public int NumberOfContendersForRace = 1;
         public int CurrentHeat = 0;
         public Boolean IsRaceActive = false;
         public int NumberofTimeForHeat = 0;
@@ -274,6 +274,18 @@ namespace chorusgui
             catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString(), "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            if (gui.NumberOfDevices > 0)
+            {
+                if ((gui.NumberOfDevices < NumberOfContendersForQualification) || (gui.NumberOfDevices < NumberOfContendersForRace))
+                {
+                    gui.btnRace.IsEnabled = false;
+                    MessageBox.Show("You dont have enough Devices to continue this event", "WARNING", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+                else
+                {
+                    gui.btnRace.IsEnabled = true;
+                }
             }
             return true;
         }

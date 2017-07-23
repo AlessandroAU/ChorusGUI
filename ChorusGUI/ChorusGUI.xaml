@@ -39,7 +39,7 @@
         <TabControl x:Name="tabControl" Margin="0,20,2,2" SelectionChanged="tabControl_SelectionChanged" Grid.ColumnSpan="2">
             <TabItem Header="Race">
                 <Grid>
-                    <Button x:Name="btnRace" Content="Start Heat" Margin="10,10,583,0" VerticalAlignment="Top" Click="button_Click"/>
+                    <Button x:Name="btnRace" Content="Start Heat" Margin="10,10,583,0" VerticalAlignment="Top" Click="button_Click" IsEnabled="False"/>
                     <DataGrid x:Name="dgCurrentHeat" Height="200" Margin="10,60,10,0" ItemsSource="{Binding Source={StaticResource HeatCollectionViewSource}}" VerticalAlignment="Top" CanUserAddRows="False" AutoGenerateColumns="false" SelectionUnit="Cell" SelectionMode="Single" CanUserDeleteRows="False" SelectedCellsChanged="dgCurrentHeat_SelectedCellsChanged">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="RF-Channel" IsReadOnly="True" Binding="{Binding Path=RFChannel}" SortDirection="Ascending"/>
@@ -210,10 +210,6 @@
                             <RadioButton x:Name="radioButton17" Content="RadioButton" HorizontalAlignment="Left" Margin="217,226,0,0" VerticalAlignment="Top"/>
                             <RadioButton x:Name="radioButton18" Content="RadioButton" HorizontalAlignment="Left" Margin="380,226,0,0" VerticalAlignment="Top"/>
                             <RadioButton x:Name="radioButton19" Content="RadioButton" HorizontalAlignment="Left" Margin="167,206,0,0" VerticalAlignment="Top"/>
-
-                            <Label x:Name="label" Content="Frequency:" HorizontalAlignment="Left" Margin="20,24,0,0" VerticalAlignment="Top"/>
-                            <TextBox x:Name="txt_freq" HorizontalAlignment="Left" Height="23" Margin="120,24,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="120" TextChanged="txt_freq_TextChanged"/>
-                            <Label x:Name="label_freq" Content="0" HorizontalAlignment="Left" Margin="270,24,0,0" VerticalAlignment="Top"/>
 
 
                         </Grid>
