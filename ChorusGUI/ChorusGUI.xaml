@@ -40,7 +40,7 @@
             <TabItem Header="Race">
                 <Grid>
                     <Button x:Name="btnRace" Content="Start Heat" Margin="10,10,583,0" VerticalAlignment="Top" Click="button_Click" IsEnabled="False"/>
-                    <DataGrid x:Name="dgCurrentHeat" Height="200" Margin="10,60,10,0" ItemsSource="{Binding Source={StaticResource HeatCollectionViewSource}}" VerticalAlignment="Top" CanUserAddRows="False" AutoGenerateColumns="false" SelectionUnit="Cell" SelectionMode="Single" CanUserDeleteRows="False" SelectedCellsChanged="dgCurrentHeat_SelectedCellsChanged">
+                    <DataGrid x:Name="dgCurrentHeat" Height="200" Margin="10,60,10,0" ItemsSource="{Binding Source={StaticResource HeatCollectionViewSource}}" VerticalAlignment="Top" CanUserAddRows="False" AutoGenerateColumns="false" SelectionUnit="Cell" SelectionMode="Single" CanUserDeleteRows="False" SelectedCellsChanged="dgCurrentHeat_SelectedCellsChanged" MouseDoubleClick="dgCurrentHeat_MouseDoubleClick">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="RF-Channel" IsReadOnly="True" Binding="{Binding Path=RFChannel}" SortDirection="Ascending"/>
                             <DataGridTextColumn Header="Pilot Name" IsReadOnly="True" Binding="{Binding Path=pilot.Name}"/>
@@ -66,7 +66,7 @@
                     <TabControl x:Name="tabControl1" Margin="10,286,10,10">
                         <TabItem Header="Qualification">
                             <Grid>
-                                <DataGrid x:Name="dgQualification" Margin="10" ItemsSource="{Binding Source={StaticResource QualificationCollectionViewSource}}" IsReadOnly="True" AutoGenerateColumns="false">
+                                <DataGrid x:Name="dgQualification" Margin="10" ItemsSource="{Binding Source={StaticResource QualificationCollectionViewSource}}" IsReadOnly="True" AutoGenerateColumns="false" MouseDoubleClick="dgRace_MouseDoubleClick">
                                     <DataGrid.Columns>
                                         <DataGridTextColumn Header="Heat" IsReadOnly="True" Binding="{Binding Path=Heat}" SortDirection="Ascending"/>
                                         <DataGridTextColumn Header="Pilot Name" Binding="{Binding Path=pilot.Name}"/>
@@ -84,7 +84,7 @@
                         </TabItem>
                         <TabItem Header="Elimination Phase">
                             <Grid>
-                                <DataGrid x:Name="dgElemination" Margin="10" ItemsSource="{Binding Source={StaticResource RaceCollectionViewSource}}" IsReadOnly="True" AutoGenerateColumns="false">
+                                <DataGrid x:Name="dgElemination" Margin="10" ItemsSource="{Binding Source={StaticResource RaceCollectionViewSource}}" IsReadOnly="True" AutoGenerateColumns="false" MouseDoubleClick="dgRace_MouseDoubleClick">
                                     <DataGrid.Columns>
                                         <DataGridTextColumn Header="Heat" IsReadOnly="True" Binding="{Binding Path=Heat}" SortDirection="Ascending"/>
                                         <DataGridTextColumn Header="Pilot Name" Binding="{Binding Path=pilot.Name}"/>
@@ -108,7 +108,7 @@
             </TabItem>
             <TabItem Header="Pilots">
                 <Grid>
-                    <DataGrid x:Name="Pilots_dataGrid" Margin="10" ItemsSource="{Binding Source={StaticResource PilotCollectionViewSource}}" AutoGenerateColumns="False">
+                    <DataGrid x:Name="Pilots_dataGrid" Margin="10" ItemsSource="{Binding Source={StaticResource PilotCollectionViewSource}}" AutoGenerateColumns="False" MouseDoubleClick="dgPilots_MouseDoubleClick">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Pilot Name" Binding="{Binding Path=Name}"/>
                             <DataGridTextColumn Header="Ranking" IsReadOnly="True" Binding="{Binding Path=Ranking}"/>

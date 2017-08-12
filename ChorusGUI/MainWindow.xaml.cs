@@ -32,7 +32,7 @@ namespace chorusgui
             if ((GUI.settings.SerialBaudIndex < 0) && (GUI.settings.SerialBaudIndex > comboBox.Items.Count))
                 GUI.settings.SerialBaudIndex = 2;
             comboBox.SelectedIndex = GUI.settings.SerialBaudIndex;
-            
+            Title = "ChorusGUI, Startup, v" + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
         }
         private void SelectPort(object sender, RoutedEventArgs e)
         {

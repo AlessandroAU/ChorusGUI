@@ -2,7 +2,7 @@
 //TODO: qualification choose between best run or best of all
 //TODO: race countdown
 //TODO: maybe: delay pilot starts?
-//TODO: maybe: doubleclick or contextmenu for heat results in qualification or race datagrid
+//TODO: maybe: doubleclick for datagrid for information window
 //TODO: search for TODO
 
 using System;
@@ -188,9 +188,9 @@ namespace chorusgui
     {
         System.Timers.Timer aTimer = new System.Timers.Timer();
         System.Timers.Timer VoltageMonitorTimer = new System.Timers.Timer();
-        public SerialPort mySerialPort;
+        public SerialPort mySerialPort = null;
         int TimerCalibration = 1000;
-        private SpeechSynthesizer synthesizer;
+        private SpeechSynthesizer synthesizer = null;
         public int NumberOfDevices;
         private uint m_previousExecutionState;
 
@@ -231,7 +231,7 @@ namespace chorusgui
                     UpdateRecentFileList("");
                     Event.LoadEvent(settings.RecentFiles[0]);
                 }
-                Title = "Chorus Lap Timer @ " + settings.SerialPortName + "(" + settings.SerialBaud + " Baud) -=] " + Event.name + " [=-";
+                Title = "Chorus Lap Timer @ " + settings.SerialPortName + "(" + settings.SerialBaud + " Baud) -=] " + Event.name + " [=-"; 
                 aTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
                 VoltageMonitorTimer.Elapsed += new ElapsedEventHandler(VoltageMonitorTimerEvent);
                 QualificationRunsLabel.Content = Event.QualificationRaces;
@@ -305,7 +305,10 @@ namespace chorusgui
                 serializer.Serialize(stream, settings);
             }
             NativeMethods.SetThreadExecutionState(m_previousExecutionState);
-            mySerialPort.Close();
+            if (mySerialPort != null)
+            {
+                mySerialPort.Close();
+            }
             Application.Current.Shutdown();
         }
 
@@ -1810,6 +1813,21 @@ namespace chorusgui
             {
 
             }
+        }
+
+        private void dgRace_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            //TODO
+        }
+
+        private void dgCurrentHeat_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            //TODO
+        }
+
+        private void dgPilots_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            //TODO
         }
     }
 }

@@ -15,7 +15,7 @@ namespace chorusgui
         public string EliminationSystem;
         public Boolean RaceMode = true;
         public int NumberOfContendersForQualification = 1;
-        public int QualificationRaces = 3;
+        public int QualificationRaces = 5;
         public int NumberOfContendersForRace = 1;
         public int CurrentHeat = 0;
         public Boolean IsRaceActive = false;
