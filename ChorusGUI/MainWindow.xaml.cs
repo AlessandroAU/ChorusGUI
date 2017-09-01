@@ -3,6 +3,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.IO.Ports;
+using System.Management;
 
 namespace chorusgui
 {
@@ -14,12 +15,42 @@ namespace chorusgui
         public MainWindow()
         {
             InitializeComponent();
+
             string[] ports = SerialPort.GetPortNames();
             if (ports.Count() == 0)
             {
                 MessageBox.Show("NO SERIAL PORTS FOUND", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
                 Close();
             }
+
+            ////////////////
+            try {
+                ManagementObjectSearcher searcher =
+                            new ManagementObjectSearcher("root\\CIMV2",
+                            "SELECT * FROM Win32_PnPEntity");
+
+                foreach (ManagementObject queryObj in searcher.Get())
+                {
+                    if (queryObj["Caption"].ToString().Contains("(COM"))
+                    {
+                        Button newBtn = new Button();
+                        var port = queryObj["Caption"].ToString();
+                        newBtn.Content = port;
+                        newBtn.Name = port.Substring(port.IndexOf("(COM") + 1).TrimEnd(')'); ;
+                        newBtn.FontSize = 12;
+                        newBtn.Width = 320;
+                        newBtn.Click += SelectPort;
+                        sp.Children.Add(newBtn);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            ////////////////
+
+            /*
             foreach (string port in ports)
             {
                 Button newBtn = new Button();
@@ -29,6 +60,7 @@ namespace chorusgui
                 newBtn.Click += SelectPort;
                 sp.Children.Add(newBtn);
             }
+            */
             if ((GUI.settings.SerialBaudIndex < 0) && (GUI.settings.SerialBaudIndex > comboBox.Items.Count))
                 GUI.settings.SerialBaudIndex = 2;
             comboBox.SelectedIndex = GUI.settings.SerialBaudIndex;

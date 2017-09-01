@@ -11,7 +11,7 @@
         <Grid.Background>
             <ImageBrush ImageSource="logo.png"/>
         </Grid.Background>
-        <StackPanel x:Name="sp" Grid.ColumnSpan="2" Margin="86,10" ScrollViewer.VerticalScrollBarVisibility="Hidden" CanVerticallyScroll="True" VerticalAlignment="Center">
+        <StackPanel x:Name="sp" Margin="10" ScrollViewer.VerticalScrollBarVisibility="Hidden" CanVerticallyScroll="True" VerticalAlignment="Center" HorizontalAlignment="Center">
             <ComboBox x:Name="comboBox" HorizontalAlignment="Center" Margin="0,0,0,0" VerticalAlignment="Top" Width="160">
                 <ComboBoxItem Content="2400 Baud" />
                 <ComboBoxItem Content="4800 Baud" />
