@@ -1,4 +1,6 @@
-﻿//TODO: code weirdo racing system
+﻿//TODO: TEST FREQUENCY MANAGEMENT!!!
+//TODO: code weirdo racing system
+//TODO: calculate best race for pilot collection
 //TODO: qualification choose between best run or best of all
 //TODO: race countdown
 //TODO: maybe: delay pilot starts?
@@ -53,8 +55,7 @@ namespace chorusgui
  
     public class ChorusDeviceClass
     {
-        public ComboBox Band;
-        public ComboBox Channel;
+        public ComboBox Frequency;
         public CheckBox SoundState;
         public CheckBox SkipFirstLap;
         public CheckBox Calibrated;
@@ -74,6 +75,7 @@ namespace chorusgui
         public double BatteryVoltageAdjustment;
         public Label CurrentVoltageLabel;
         public Grid grid;
+        public int APIVersion;
     }
 
     [Serializable]
@@ -417,6 +419,7 @@ namespace chorusgui
                                 cbVoltageMonitoring.Items.Add("Device " + ii);
                                 ChorusDevices[ii] = new ChorusDeviceClass();
                                 ChorusDevices[ii].BatteryVoltageAdjustment = 1;
+                                ChorusDevices[ii].APIVersion = 0;
                                 Grid grid = new Grid();
                                 CheckBox checkbox = new CheckBox();
                                 checkbox.Content = "Device is configured";
@@ -472,47 +475,99 @@ namespace chorusgui
                                 grid.Children.Add(checkbox);
                                 ChorusDevices[ii].SkipFirstLap = checkbox;
 
-                                ComboBox combobox = new ComboBox();
-                                combobox.Items.Add("0, Raceband");
-                                combobox.Items.Add("1, Band A");
-                                combobox.Items.Add("2, Band B");
-                                combobox.Items.Add("3, Band E");
-                                combobox.Items.Add("4, Band F(Airwave)");
-                                combobox.Items.Add("5, Band D (5.3)");
-                                combobox.HorizontalAlignment = HorizontalAlignment.Left;
-                                combobox.VerticalAlignment = VerticalAlignment.Top;
-                                combobox.SelectedIndex = 0;
-                                combobox.Name = "ID" + ii + "B";
-                                combobox.Margin = new Thickness(10, 90, 10, 0);
-                                combobox.Height = 20;
-                                combobox.Width = 150;
-                                combobox.SelectionChanged += device_cbSelChange;
-                                grid.Children.Add(combobox);
-                                ChorusDevices[ii].Band = combobox;
+                                label = new Label();
+                                label.Content = "Freqency: ";
+                                label.Name = "ID" + ii + "FREQ";
+                                label.Margin = new Thickness(10, 87, 0, 0);
+                                grid.Children.Add(label);
 
-                                combobox = new ComboBox();
-                                combobox.Items.Add("Channel 1");
-                                combobox.Items.Add("Channel 2");
-                                combobox.Items.Add("Channel 3");
-                                combobox.Items.Add("Channel 4");
-                                combobox.Items.Add("Channel 5");
-                                combobox.Items.Add("Channel 6");
-                                combobox.Items.Add("Channel 7");
-                                combobox.Items.Add("Channel 8");
+                                ComboBox combobox = new ComboBox();
+                                combobox.Items.Add(new ComboBoxItem { Content = "5180, Connex", Tag = "5180" });
+                                combobox.Items.Add(new ComboBoxItem { Content = "5200, Connex", Tag = "5200" });
+                                combobox.Items.Add(new ComboBoxItem { Content = "5220, Connex", Tag = "5220" });
+                                combobox.Items.Add(new ComboBoxItem { Content = "5240, Connex", Tag = "5240" });
+                                combobox.Items.Add(new ComboBoxItem { Content = "5645, Band E/Channel 1", Tag = "5645" });
+                                combobox.Items.Add(new ComboBoxItem { Content = "5658, RaceBand/Channel 1", Tag = "5658" });
+                                combobox.Items.Add(new ComboBoxItem { Content = "5665, Band E/Channel 2", Tag = "5665" });
+                                combobox.Items.Add(new ComboBoxItem { Content = "5685, Band E/Channel 3", Tag = "5685" });
+                                combobox.Items.Add(new ComboBoxItem { Content = "5695, RaceBand/Channel 2", Tag = "5695" });
+                                combobox.Items.Add(new ComboBoxItem { Content = "5705, Band E/Channel 4", Tag = "5705" });
+                                combobox.Items.Add(new ComboBoxItem { Content = "5725, Band A/Channel 1", Tag = "5725" });
+                                combobox.Items.Add(new ComboBoxItem { Content = "5732, RaceBand/Channel 3", Tag = "5732" });
+                                combobox.Items.Add(new ComboBoxItem { Content = "5733, Band B/Channel 1", Tag = "5733" });
+                                combobox.Items.Add(new ComboBoxItem { Content = "5740, Band F(IRC)/Channel 1", Tag = "5740" });
+                                combobox.Items.Add(new ComboBoxItem { Content = "5745, Band A/Channel 2 + Connex", Tag = "5745" });
+                                combobox.Items.Add(new ComboBoxItem { Content = "5752, Band B/Channel 2", Tag = "5752" });
+                                combobox.Items.Add(new ComboBoxItem { Content = "5760, Band F(IRC)/Channel 2", Tag = "5760" });
+                                combobox.Items.Add(new ComboBoxItem { Content = "5765, Band A/Channel 3 + Connex", Tag = "5765" });
+                                combobox.Items.Add(new ComboBoxItem { Content = "5769, RaceBand/Channel 4", Tag = "5769" });
+                                combobox.Items.Add(new ComboBoxItem { Content = "5771, Band B/Channel 3", Tag = "5771" });
+                                combobox.Items.Add(new ComboBoxItem { Content = "5780, Band F(IRC)/Channel 3", Tag = "5780" });
+                                combobox.Items.Add(new ComboBoxItem { Content = "5785, Band A/Channel 4 + Connex", Tag = "5785" });
+                                combobox.Items.Add(new ComboBoxItem { Content = "5790, Band B/Channel 4", Tag = "5790" });
+                                combobox.Items.Add(new ComboBoxItem { Content = "5800, Band F(IRC)/Channel 4", Tag = "5800" });
+                                combobox.Items.Add(new ComboBoxItem { Content = "5805, Band A/Channel 5 + Connex", Tag = "5805" });
+                                combobox.Items.Add(new ComboBoxItem { Content = "5806, RaceBand/Channel 5", Tag = "5806" });
+                                combobox.Items.Add(new ComboBoxItem { Content = "5809, Band B/Channel 5", Tag = "5809" });
+                                combobox.Items.Add(new ComboBoxItem { Content = "5820, Band F(IRC)/Channel 5", Tag = "5820" });
+                                combobox.Items.Add(new ComboBoxItem { Content = "5825, Band A/Channel 6 + Connex", Tag = "5825" });
+                                combobox.Items.Add(new ComboBoxItem { Content = "5828, Band B/Channel 6", Tag = "5828" });
+                                combobox.Items.Add(new ComboBoxItem { Content = "5840, Band F(IRC)/Channel 6", Tag = "5840" });
+                                combobox.Items.Add(new ComboBoxItem { Content = "5843, RaceBand/Channel 6", Tag = "5843" });
+                                combobox.Items.Add(new ComboBoxItem { Content = "5845, Band A/Channel 7 + Connex", Tag = "5845" });
+                                combobox.Items.Add(new ComboBoxItem { Content = "5847, Band B/Channel 7", Tag = "5847" });
+                                combobox.Items.Add(new ComboBoxItem { Content = "5860, Band F(IRC)/Channel 7", Tag = "5860" });
+                                combobox.Items.Add(new ComboBoxItem { Content = "5865, Band A/Channel 8", Tag = "5865" });
+                                combobox.Items.Add(new ComboBoxItem { Content = "5866, Band B/Channel 8", Tag = "5866" });
+                                combobox.Items.Add(new ComboBoxItem { Content = "5880, RaceBand/Channel 7 + Band F(IRC)/Channel 8", Tag = "5880" });
+                                combobox.Items.Add(new ComboBoxItem { Content = "5885, Band E/Channel 5", Tag = "5885" });
+                                combobox.Items.Add(new ComboBoxItem { Content = "5905, Band E/Channel 6", Tag = "5905" });
+                                combobox.Items.Add(new ComboBoxItem { Content = "5917, RaceBand/Channel 8", Tag = "5917" });
+                                combobox.Items.Add(new ComboBoxItem { Content = "5925, Band E/Channel 7", Tag = "5925" });
+                                combobox.Items.Add(new ComboBoxItem { Content = "5945, Band E/Channel 8", Tag = "5945" });
+
                                 combobox.HorizontalAlignment = HorizontalAlignment.Left;
                                 combobox.VerticalAlignment = VerticalAlignment.Top;
                                 combobox.SelectedIndex = 0;
-                                combobox.Name = "ID" + ii + "C";
-                                combobox.Margin = new Thickness(200, 90, 10, 0);
+                                combobox.Name = "ID"+ii+"F";
+                                combobox.Tag = ii;
+                                combobox.Margin = new Thickness(80, 90, 10, 0);
                                 combobox.Height = 20;
-                                combobox.Width = 150;
-                                if (ii < 8)
+                                combobox.Width = 330;
+                                combobox.IsEditable = true;
+                                switch (ii)
                                 {
-                                    combobox.SelectedIndex = ii;
+                                    default:
+                                    case 0:
+                                        combobox.SelectedIndex = 5;
+                                        break;
+                                    case 1:
+                                        combobox.SelectedIndex = 8;
+                                        break;
+                                    case 2:
+                                        combobox.SelectedIndex = 11;
+                                        break;
+                                    case 3:
+                                        combobox.SelectedIndex = 18;
+                                        break;
+                                    case 4:
+                                        combobox.SelectedIndex = 25;
+                                        break;
+                                    case 5:
+                                        combobox.SelectedIndex = 31;
+                                        break;
+                                    case 6:
+                                        combobox.SelectedIndex = 37;
+                                        break;
+                                    case 7:
+                                        combobox.SelectedIndex = 40;
+                                        break;
                                 }
+
+                                combobox.AddHandler(System.Windows.Controls.Primitives.TextBoxBase.TextChangedEvent, new System.Windows.Controls.TextChangedEventHandler(device_textChange));
                                 combobox.SelectionChanged += device_cbSelChange;
                                 grid.Children.Add(combobox);
-                                ChorusDevices[ii].Channel = combobox;
+                                ChorusDevices[ii].Frequency = combobox;
 
                                 checkbox = new CheckBox();
                                 checkbox.Content = "RSSI Monitoring is Active";
@@ -659,28 +714,23 @@ namespace chorusgui
                             int device = readbuffer[1] - '0';
                             switch (readbuffer[2])
                             {
-                                case 'B': //Current Band (half-byte; 0 - 5)
-                                    if ((readbuffer[3] - '0') != ChorusDevices[device].Band.SelectedIndex)
+                                case 'Q': //set frequency
+                                    var freq = int.Parse(readbuffer.Substring(3), System.Globalization.NumberStyles.HexNumber);
+                                    if (ChorusDevices[device].Frequency.SelectedItem == null)
                                     {
-                                        SendData("R" + device + "N" + ChorusDevices[device].Band.SelectedIndex);
+                                        if (ChorusDevices[device].Frequency.Text != freq.ToString())
+                                        {
+                                            SendData("R" + device + "Q" + Convert.ToInt32(ChorusDevices[device].Frequency.Text).ToString("X4"));
+                                        }
                                     }
                                     else
                                     {
-                                        ChorusDevices[device].Band.SelectedIndex = readbuffer[3] - '0';
+                                        ComboBoxItem cbitem = (ComboBoxItem)ChorusDevices[device].Frequency.SelectedItem;
+                                        if (cbitem.Tag.ToString() != freq.ToString())
+                                        {
+                                            SendData("R" + device + "Q" + int.Parse(cbitem.Tag.ToString()).ToString("X4"));
+                                        }
                                     }
-                                    break;
-                                case 'C': //Current Channel (half-byte; 0 - 7)
-                                    if ((readbuffer[3] - '0') != ChorusDevices[device].Channel.SelectedIndex)
-                                    {
-                                        SendData("R" + device + "H" + ChorusDevices[device].Channel.SelectedIndex);
-                                    }
-                                    else
-                                    {
-                                        ChorusDevices[device].Channel.SelectedIndex = readbuffer[3] - '0';
-                                    }
-                                    break;
-                                case 'O': //set frequency
-                                    //TODO: set frequency
                                     break;
                                 case 'D': //Sound State (half-byte; 1 = On, 0 = Off)
                                     if (readbuffer[3] == '0')
@@ -714,10 +764,6 @@ namespace chorusgui
                                     else
                                     {
                                         ChorusDevices[device].Calibrated.IsChecked = true;
-                                        if (device < 8)
-                                        {
-                                            SendData("R" + device + "H" + device);
-                                        }
                                     }
                                     break;
                                 case 'I': //Calibration Time (4 bytes)
@@ -792,7 +838,15 @@ namespace chorusgui
                                         }
                                     }
                                     break;
+                                case '#': //APIVERSION
+                                    ChorusDevices[device].APIVersion = int.Parse(readbuffer.Substring(3), System.Globalization.NumberStyles.HexNumber);
+                                    break;
                                 case 'X': //All states corresponding to specified letters (see above) plus 'X' meaning the end of state transmission for each device
+                                    if (ChorusDevices[device].APIVersion < 1)
+                                    {
+                                        MessageBox.Show("WARNING! THIS VERSION NEEDS AT LEAST API VERSION. PLEASE UPDATE YOUR CHORUS-RF VERSION", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+                                        Application.Current.Shutdown();
+                                    }
                                     if (device == 0)
                                     {
                                         aTimer.Interval = 1000;
@@ -1122,17 +1176,42 @@ namespace chorusgui
         private void device_cbSelChange(object sender, SelectionChangedEventArgs e)
         {
             ComboBox combobox = (ComboBox)sender;
-            var device = combobox.Name[2] - '0';
-            switch (combobox.Name[3])
+            ComboBoxItem cbitem = (ComboBoxItem)combobox.SelectedItem;
+            if (cbitem != null)
             {
-                case 'B':
-                    SendData("R" + device + "N" + combobox.SelectedIndex);
-                    break;
-                case 'C':
-                    SendData("R" + device + "H" + combobox.SelectedIndex);
-                    break;
+                SendData("R" + combobox.Tag + "Q" + int.Parse(cbitem.Tag.ToString()).ToString("X4"));
             }
         }
+
+        void device_textChange(object sender, TextChangedEventArgs e)
+        {
+            ComboBox combobox = (ComboBox)sender;
+            if (combobox.SelectedItem == null)
+            {
+                int value;
+                try
+                {
+                    value = Convert.ToInt32(combobox.Text);
+                }
+                catch (FormatException)
+                {
+                    if (combobox.Text != "")
+                    {
+                        combobox.SelectedIndex = 0;
+                        return;
+                    }
+                    else
+                    {
+                        value = 0;
+                    }
+                }
+                if ((value <= 6000) && (value >= 5180))
+                {
+                    SendData("R" + combobox.Tag + "Q" + value.ToString("X4"));
+                }
+            }
+        }
+
         #endregion
 
         #region Settings_Debug
@@ -1555,8 +1634,20 @@ namespace chorusgui
                         if (race.pilot.BestLap > race.BestLap)
                         {
                             race.pilot.BestLap = race.BestLap;
+                            foreach (Pilot pilot in Event.pilots)
+                            {
+                                if (pilot.guid == race.pilot.guid)
+                                {
+                                    if (pilot.BestLap > race.BestLap)
+                                    {
+                                        pilot.BestLap = race.BestLap;
+                                    }
+                                    //TODO: check if best race for Pilot collection
+                                    break;
+                                }
+                            }
                         }
-                        //TODO: check if best race for Pilot collection
+                        
                     }
                 }
                 else
@@ -1575,8 +1666,19 @@ namespace chorusgui
                         if (race.pilot.BestLap > race.BestLap)
                         {
                             race.pilot.BestLap = race.BestLap;
+                            foreach (Pilot pilot in Event.pilots)
+                            {
+                                if (pilot.guid == race.pilot.guid)
+                                {
+                                    if (pilot.BestLap > race.BestLap)
+                                    {
+                                        pilot.BestLap = race.BestLap;
+                                    }
+                                    //TODO: check if best race for Pilot collection
+                                    break;
+                                }
+                            }
                         }
-                        //TODO: check if best race for Pilot collection
                     }
                 }
             }
