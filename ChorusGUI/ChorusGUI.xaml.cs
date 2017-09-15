@@ -1,6 +1,5 @@
 ﻿//TODO: calculate best race for pilot collection
 //TODO: qualification choose between best run or best of all
-//TODO: speak lap times
 //TODO: code weirdo racing system
 //TODO: maybe: delay pilot starts?
 //TODO: maybe: doubleclick for datagrid for information window
@@ -1402,7 +1401,6 @@ namespace chorusgui
         }
         #endregion
 
-
         #region Raceing
         private void UpdateHeatTable()
         {
@@ -1459,7 +1457,7 @@ namespace chorusgui
             {
                 SendData("R*r");
                 btnRace.Content = "Verify Results";
-                synthesizer.SpeakAsync("Race finished");
+                synthesizer.SpeakAsync("Heat finished");
                 foreach (Race race in Heat)
                 {
                     if (race.laps==null)
@@ -1549,7 +1547,7 @@ namespace chorusgui
                 }
                 race.laps += lap + ":" + milliseconds + ";";
                 CalculateResults(race);
-                //TODO: speak lap time
+                /*TODO BETA TEST THIS ONE*/synthesizer.SpeakAsync(race.pilot.Name + ", lap " + lap + ", "+ milliseconds + " milliseconds");
             }
         }
 
@@ -1592,6 +1590,7 @@ namespace chorusgui
                         //laps to finish
                         if (lapnum == Event.NumberofTimeForHeat)
                         {
+                            /*TODO BETA TEST THIS ONE*/synthesizer.SpeakAsync(race.pilot.Name + " heat complete");
                             break;
                         }
                     }
@@ -1600,6 +1599,7 @@ namespace chorusgui
                         //time to race
                         if (totaltime >= Event.NumberofTimeForHeat * 1000)
                         {
+                            /*TODO BETA TEST THIS ONE*/synthesizer.SpeakAsync(race.pilot.Name + " heat complete");
                             break;
                         }
                     }
