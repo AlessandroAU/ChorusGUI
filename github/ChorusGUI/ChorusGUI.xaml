@@ -1,0 +1,231 @@
+﻿<Window x:Name="window" x:Class="chorusgui.ChorusGUI"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:chorusgui"
+        mc:Ignorable="d mc"
+        xmlns:debugmode="debugmode"
+        Title="Chorus Lap Timer" Height="714.972" Width="809.25"
+        Closing="Window_Closing"
+        Loaded="Window_Loaded">
+
+    <Window.Resources>
+        <local:PilotCollection x:Key="PilotCollection"/>
+        <CollectionViewSource x:Key="PilotCollectionViewSource" Source="{StaticResource PilotCollection}"/>
+        <local:RaceCollection x:Key="RaceCollection"/>
+        <CollectionViewSource x:Key="RaceCollectionViewSource" Source="{StaticResource RaceCollection}"/>
+        <local:QualificationCollection x:Key="QualificationCollection"/>
+        <CollectionViewSource x:Key="QualificationCollectionViewSource" Source="{StaticResource QualificationCollection}"/>
+        <local:HeatCollection x:Key="HeatCollection"/>
+        <CollectionViewSource x:Key="HeatCollectionViewSource" Source="{StaticResource HeatCollection}"/>
+    </Window.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="157*"/>
+            <ColumnDefinition Width="110*"/>
+        </Grid.ColumnDefinitions>
+        <Menu x:Name="menu" Height="20" VerticalAlignment="Top" Grid.ColumnSpan="2" Background="{x:Null}">
+            <Menu.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <DockPanel HorizontalAlignment="Stretch"/>
+                </ItemsPanelTemplate>
+            </Menu.ItemsPanel>
+            <MenuItem x:Name="IDM_NEW" Header="_New Event" Click="IDM_NEW_Click"/>
+            <MenuItem x:Name="IDM_LOAD" Header="_Load Event"/>
+            <MenuItem x:Name="IDM_SAVEAS" Header="_Save Event as" Click="IDM_SAVEAS_Click"/>
+            <MenuItem x:Name="IDM_HELP" Header="_Help" HorizontalAlignment="Right" Click="IDM_HELP_Click"/>
+        </Menu>
+        <TabControl x:Name="tabControl" Margin="0,20,2,2" SelectionChanged="tabControl_SelectionChanged" Grid.ColumnSpan="2">
+            <TabItem Header="Race">
+                <Grid>
+                    <Button x:Name="btnRace" Content="Start Heat" Margin="10,10,583,0" VerticalAlignment="Top" Click="button_Click" IsEnabled="False"/>
+                    <DataGrid x:Name="dgCurrentHeat" Height="200" Margin="10,60,10,0" ItemsSource="{Binding Source={StaticResource HeatCollectionViewSource}}" VerticalAlignment="Top" CanUserAddRows="False" AutoGenerateColumns="false" SelectionUnit="Cell" SelectionMode="Single" CanUserDeleteRows="False" SelectedCellsChanged="dgCurrentHeat_SelectedCellsChanged" MouseDoubleClick="dgCurrentHeat_MouseDoubleClick">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="RF-Channel" IsReadOnly="True" Binding="{Binding Path=RFChannel}" SortDirection="Ascending"/>
+                            <DataGridTextColumn Header="Pilot Name" IsReadOnly="True" Binding="{Binding Path=pilot.Name}"/>
+                            <DataGridTextColumn Header="Result" IsReadOnly="True" Binding="{Binding Path=Result}"/>
+                            <DataGridTextColumn Header="Lap 0" IsReadOnly="True"  Binding="{Binding Path=lap[0]}"/>
+                            <DataGridTextColumn Header="Lap 1" IsReadOnly="True" Binding="{Binding Path=lap[1]}"/>
+                            <DataGridTextColumn Header="Lap 2" IsReadOnly="True" Binding="{Binding Path=lap[2]}"/>
+                            <DataGridTextColumn Header="Lap 3" IsReadOnly="True" Binding="{Binding Path=lap[3]}"/>
+                            <DataGridTextColumn Header="Lap 4" IsReadOnly="True" Binding="{Binding Path=lap[4]}"/>
+                            <DataGridTextColumn Header="Lap 5" IsReadOnly="True" Binding="{Binding Path=lap[5]}"/>
+                            <DataGridTextColumn Header="Lap 6" IsReadOnly="True" Binding="{Binding Path=lap[6]}"/>
+                            <DataGridTextColumn Header="Lap 7" IsReadOnly="True" Binding="{Binding Path=lap[7]}"/>
+                            <DataGridTextColumn Header="Lap 8" IsReadOnly="True" Binding="{Binding Path=lap[8]}"/>
+                            <DataGridTextColumn Header="Lap 9" IsReadOnly="True" Binding="{Binding Path=lap[9]}"/>
+                            <DataGridTextColumn Header="Lap 10" IsReadOnly="True" Binding="{Binding Path=lap[10]}"/>
+                            <mc:AlternateContent>
+                                <mc:Choice Requires="debugmode">
+                                    <DataGridTextColumn Header="GUID" IsReadOnly="True" Binding="{Binding Path=guid}"/>
+                                </mc:Choice>
+                            </mc:AlternateContent>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <TabControl x:Name="tabControl1" Margin="10,286,10,10">
+                        <TabItem Header="Qualification">
+                            <Grid>
+                                <DataGrid x:Name="dgQualification" Margin="10" ItemsSource="{Binding Source={StaticResource QualificationCollectionViewSource}}" IsReadOnly="True" AutoGenerateColumns="false" MouseDoubleClick="dgRace_MouseDoubleClick">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Heat" IsReadOnly="True" Binding="{Binding Path=Heat}" SortDirection="Ascending"/>
+                                        <DataGridTextColumn Header="Pilot Name" Binding="{Binding Path=pilot.Name}"/>
+                                        <mc:AlternateContent>
+                                            <mc:Choice Requires="debugmode">
+                                                <DataGridTextColumn Header="GUID" IsReadOnly="True" Binding="{Binding Path=guid}"/>
+                                            </mc:Choice>
+                                        </mc:AlternateContent>
+                                        <DataGridTextColumn Header="RF-Channel" IsReadOnly="True" Binding="{Binding Path=RFChannel}"/>
+                                        <DataGridTextColumn Header="Result" IsReadOnly="True" Binding="{Binding Path=Result}"/>
+                                        <DataGridTextColumn Header="Best Lap in Heat" IsReadOnly="True" Binding="{Binding Path=BestLap}"/>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </Grid>
+                        </TabItem>
+                        <TabItem Header="Elimination Phase">
+                            <Grid>
+                                <DataGrid x:Name="dgElemination" Margin="10" ItemsSource="{Binding Source={StaticResource RaceCollectionViewSource}}" IsReadOnly="True" AutoGenerateColumns="false" MouseDoubleClick="dgRace_MouseDoubleClick">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Heat" IsReadOnly="True" Binding="{Binding Path=Heat}" SortDirection="Ascending"/>
+                                        <DataGridTextColumn Header="Pilot Name" Binding="{Binding Path=pilot.Name}"/>
+                                        <mc:AlternateContent>
+                                            <mc:Choice Requires="debugmode">
+                                                <DataGridTextColumn Header="GUID" IsReadOnly="True" Binding="{Binding Path=guid}"/>
+                                            </mc:Choice>
+                                        </mc:AlternateContent>
+                                        <DataGridTextColumn Header="RF-Channel" IsReadOnly="True" Binding="{Binding Path=RFChannel}"/>
+                                        <DataGridTextColumn Header="Result" IsReadOnly="True" Binding="{Binding Path=Result}"/>
+                                        <DataGridTextColumn Header="Best Lap in Heat" IsReadOnly="True" Binding="{Binding Path=BestLap}"/>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </Grid>
+
+                        </TabItem>
+                    </TabControl>
+                    <Label x:Name="labelCurrentHeat" Content="Qualification Run 1, Heat 1:" HorizontalAlignment="Left" Margin="10,34,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
+                    <Label x:Name="label6" Content="Results:" HorizontalAlignment="Left" Margin="10,260,0,0" VerticalAlignment="Top" FontWeight="Bold" RenderTransformOrigin="0.475,3.163"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Pilots">
+                <Grid>
+                    <DataGrid x:Name="Pilots_dataGrid" Margin="10" ItemsSource="{Binding Source={StaticResource PilotCollectionViewSource}}" AutoGenerateColumns="False" MouseDoubleClick="dgPilots_MouseDoubleClick">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Pilot Name" Binding="{Binding Path=Name}"/>
+                            <DataGridTextColumn Header="Ranking" IsReadOnly="True" Binding="{Binding Path=Ranking}"/>
+                            <DataGridTextColumn Header="Best Lap" IsReadOnly="True" Binding="{Binding Path=BestLap}"/>
+                            <DataGridTextColumn Header="Best Race" IsReadOnly="True" Binding="{Binding Path=BestRace}"/>
+                            <mc:AlternateContent>
+                                <mc:Choice Requires="debugmode">
+                                    <DataGridTextColumn Header="GUID" IsReadOnly="True" Binding="{Binding Path=guid}"/>
+                                </mc:Choice>
+                            </mc:AlternateContent>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Settings" HorizontalAlignment="Left" Height="20" VerticalAlignment="Top" Width="54">
+                <TabControl x:Name="Settings_TabControl" Margin="10" RenderTransformOrigin="0.497,0.564" SelectionChanged="Settings_TabControl_SelectionChanged">
+                    <TabItem Header="Race" FontWeight="Bold">
+                        <Grid x:Name="RaceSettingsGrid">
+
+                            <Label x:Name="labela" Content="Event Name:" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
+                            <TextBox x:Name="txtEventName" HorizontalAlignment="Left" Height="23" Margin="121,12,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="300" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" TextChanged="txtEventName_TextChanged"/>
+
+                            <Separator Height="12" Margin="9,41,11,0" VerticalAlignment="Top" RenderTransformOrigin="0.493,-2.983"/>
+                            <RadioButton x:Name="cbRaceMode1" Content="Laps to Finish" HorizontalAlignment="Left" Margin="12,58,0,0" VerticalAlignment="Top" Checked="RaceMode_Checked"/>
+                            <TextBox x:Name="txtRaceMode" HorizontalAlignment="Left" Height="23" Margin="121,55,0,0" TextWrapping="Wrap" Text="120" VerticalAlignment="Top" Width="45" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" TextChanged="txtRaceMode_TextChanged"/>
+                            <RadioButton x:Name="cbRaceMode2" Content="Time to Race + Overtime" HorizontalAlignment="Left" Margin="183,58,0,0" VerticalAlignment="Top" IsChecked="True" Checked="RaceMode_Checked"/>
+
+                            <Separator Height="12" Margin="10,83,10,0" VerticalAlignment="Top" RenderTransformOrigin="0.493,-2.983"/>
+                            <Label x:Name="label1" Content="Minimal Lap Time" HorizontalAlignment="Left" Margin="9,100,0,0" VerticalAlignment="Top"/>
+                            <Button x:Name="DecMinimalLapTime" Content="-" HorizontalAlignment="Left" Margin="183,103,0,0" VerticalAlignment="Top" Width="28" Click="btn_MinimalLapTime"/>
+                            <Label x:Name="MinimalLapTimeLabel" Content="5 seconds" HorizontalAlignment="Left" Margin="223,100,0,0" VerticalAlignment="Top" HorizontalContentAlignment="Center"/>
+                            <Button x:Name="IncMinimalLapTime1" Content="+" HorizontalAlignment="Left" Margin="303,103,0,0" VerticalAlignment="Top" Width="28" Click="btn_MinimalLapTime"/>
+
+                            <Separator Height="12" Margin="13,128,7,0" VerticalAlignment="Top" RenderTransformOrigin="0.493,-2.983"/>
+                            <CheckBox x:Name="cbSkipFirstLap" Content="Skip First Lap" HorizontalAlignment="Left" Margin="13,147,0,0" VerticalAlignment="Top" Click="SkipFirstLap_CLick" IsChecked="True"/>
+                            <ComboBox x:Name="cbElimination" HorizontalAlignment="Left" Margin="184,144,0,0" VerticalAlignment="Top" Width="147" SelectedIndex="1" SelectionChanged="cbElimination_SelectionChanged">
+                                <ComboBoxItem Content="Single Out" Tag="singleout" HorizontalAlignment="Left" Width="145"/>
+                                <ComboBoxItem Content="Double Out" Tag="doubleout" HorizontalAlignment="Left" Width="145"/>
+                            </ComboBox>
+
+                            <Separator Height="12" Margin="13,168,7,0" VerticalAlignment="Top" RenderTransformOrigin="0.493,-2.983"/>
+                            <Label x:Name="label3" Content="Number of Contenders for qualification run:" HorizontalAlignment="Left" Margin="10,183,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.575,-1.251"/>
+                            <TextBox x:Name="contenders1" HorizontalAlignment="Left" Height="23" Margin="277,187,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="54" IsEnabled="False" Text="1"/>
+                            <Slider x:Name="contender_slider1" Margin="13,210,7,0" VerticalAlignment="Top" TickPlacement="Both" Maximum="8" SmallChange="1" IsSnapToTickEnabled="True" Minimum="1" Value="1" Ticks="1,2,3,4,5,6,7,8" ValueChanged="contender_slider1_ValueChanged"/>
+
+                            <Separator Height="12" Margin="13,240,7,0" VerticalAlignment="Top" RenderTransformOrigin="0.493,-2.983"/>
+                            <Label x:Name="label4" Content="Qualification Races" HorizontalAlignment="Left" Margin="13,257,0,0" VerticalAlignment="Top"/>
+                            <Button x:Name="DecQualificationRuns" Content="-" HorizontalAlignment="Left" Margin="183,260,0,0" VerticalAlignment="Top" Width="28" Click="btn_QualificationRuns"/>
+                            <Label x:Name="QualificationRunsLabel" Content="3" HorizontalAlignment="Left" Margin="248,257,0,0" VerticalAlignment="Top" HorizontalContentAlignment="Center"/>
+                            <Button x:Name="IncQualificationRuns" Content="+" HorizontalAlignment="Left" Margin="303,260,0,0" VerticalAlignment="Top" Width="28" Click="btn_QualificationRuns"/>
+                            <ComboBox x:Name="cbQualificationAddResults" HorizontalAlignment="Left" Margin="370,259,0,0" VerticalAlignment="Top" Width="147" SelectedIndex="0" SelectionChanged="cbQualificationAddResults_SelectionChanged">
+                                <ComboBoxItem Content="Best out of One" Tag="bestrun" HorizontalAlignment="Left" Width="145"/>
+                                <ComboBoxItem Content="Best out of 2" Tag="bestoftwo" HorizontalAlignment="Left" Width="145"/>
+                                <ComboBoxItem Content="Best out of all" Tag="betofall" HorizontalAlignment="Left" Width="145"/>
+                            </ComboBox>
+
+                            <Separator Height="12" Margin="13,285,7,0" VerticalAlignment="Top" RenderTransformOrigin="0.493,-2.983"/>
+                            <Label x:Name="label5" Content="Number of Contenders for elimination run:" HorizontalAlignment="Left" Margin="10,302,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.575,-1.251"/>
+                            <TextBox x:Name="contenders2" HorizontalAlignment="Left" Height="23" Margin="277,304,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="54" IsEnabled="False" Text="0"/>
+                            <Slider x:Name="contender_slider2" Margin="13,323,7,0" VerticalAlignment="Top" TickPlacement="Both" Maximum="8" SmallChange="1" IsSnapToTickEnabled="True" Ticks="0,2,4,6,8" ValueChanged="contender_slider2_ValueChanged"/>
+
+                            <Separator Height="12" Margin="13,354,7,0" VerticalAlignment="Top" RenderTransformOrigin="0.493,-2.983"/>
+                            <Label x:Name="label7" Content="Number of Contenders for Elimination Phase:" HorizontalAlignment="Left" Margin="13,371,0,0" VerticalAlignment="Top"/>
+                            <TextBox x:Name="txtContenders" HorizontalAlignment="Left" Height="23" Margin="277,373,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="54" Text="0" TextChanged="txtContenders_TextChanged"/>
+                        </Grid>
+                    </TabItem>
+                    <TabItem Header="App Settings" FontWeight="Bold">
+                        <Grid x:Name="AppSettingsGrid">
+
+
+                            <ComboBox x:Name="cbSpeechVoice" HorizontalAlignment="Left" Margin="149,53,0,0" VerticalAlignment="Top" Width="385" SelectionChanged="cbSpeechVoice_SelectionChanged"/>
+
+                            <CheckBox x:Name="cbEnableVoltageMonitoring" Content="Enable Voltage Monitoring for Device" HorizontalAlignment="Left" Margin="238,266,0,0" VerticalAlignment="Top" Click="VoltageMonitoring_CLick" />
+                            <ComboBox x:Name="cbVoltageMonitoring" HorizontalAlignment="Left" Margin="255,286,0,0" VerticalAlignment="Top" Width="204" IsEnabled="False" SelectionChanged="cbVoltageMonitoring_SelChange"/>
+                            <RadioButton x:Name="radioButton1" Content="RadioButton" HorizontalAlignment="Left" Margin="426,206,0,0" VerticalAlignment="Top"/>
+                            <RadioButton x:Name="radioButton2" Content="RadioButton" HorizontalAlignment="Left" Margin="167,166,0,0" VerticalAlignment="Top"/>
+                            <RadioButton x:Name="radioButton3" Content="RadioButton" HorizontalAlignment="Left" Margin="426,186,0,0" VerticalAlignment="Top"/>
+                            <RadioButton x:Name="radioButton4" Content="RadioButton" HorizontalAlignment="Left" Margin="167,186,0,0" VerticalAlignment="Top"/>
+                            <RadioButton x:Name="radioButton5" Content="RadioButton" HorizontalAlignment="Left" Margin="426,166,0,0" VerticalAlignment="Top"/>
+                            <RadioButton x:Name="radioButton6" Content="RadioButton" HorizontalAlignment="Left" Margin="167,146,0,0" VerticalAlignment="Top"/>
+                            <RadioButton x:Name="radioButton7" Content="RadioButton" HorizontalAlignment="Left" Margin="426,146,0,0" VerticalAlignment="Top"/>
+                            <RadioButton x:Name="radioButton8" Content="RadioButton" HorizontalAlignment="Left" Margin="217,126,0,0" VerticalAlignment="Top"/>
+                            <RadioButton x:Name="radioButton9" Content="RadioButton" HorizontalAlignment="Left" Margin="380,126,0,0" VerticalAlignment="Top"/>
+                            <RadioButton x:Name="radioButton10" Content="RadioButton" HorizontalAlignment="Left" Margin="298,105,0,0" VerticalAlignment="Top"/>
+
+
+                            <RadioButton x:Name="radioButton11" Content="RadioButton" HorizontalAlignment="Left" Margin="298,85,0,0" VerticalAlignment="Top"/>
+                            <RadioButton x:Name="radioButton12" Content="RadioButton" HorizontalAlignment="Left" Margin="38,85,0,0" VerticalAlignment="Top"/>
+                            <RadioButton x:Name="radioButton13" Content="RadioButton" HorizontalAlignment="Left" Margin="564,85,0,0" VerticalAlignment="Top"/>
+                            <RadioButton x:Name="radioButton14" Content="RadioButton" HorizontalAlignment="Left" Margin="125,106,0,0" VerticalAlignment="Top"/>
+                            <RadioButton x:Name="radioButton15" Content="RadioButton" HorizontalAlignment="Left" Margin="472,106,0,0" VerticalAlignment="Top"/>
+                            <RadioButton x:Name="radioButton16" Content="RadioButton" HorizontalAlignment="Left" Margin="298,246,0,0" VerticalAlignment="Top"/>
+                            <RadioButton x:Name="radioButton17" Content="RadioButton" HorizontalAlignment="Left" Margin="217,226,0,0" VerticalAlignment="Top"/>
+                            <RadioButton x:Name="radioButton18" Content="RadioButton" HorizontalAlignment="Left" Margin="380,226,0,0" VerticalAlignment="Top"/>
+                            <RadioButton x:Name="radioButton19" Content="RadioButton" HorizontalAlignment="Left" Margin="167,206,0,0" VerticalAlignment="Top"/>
+
+
+                        </Grid>
+                    </TabItem>
+
+                </TabControl>
+            </TabItem>
+            <TabItem Header="Debug" HorizontalAlignment="Left" Height="20" VerticalAlignment="Top" Width="54">
+                <Grid Background="#FFE5E5E5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="22*"/>
+                        <ColumnDefinition Width="83*"/>
+                    </Grid.ColumnDefinitions>
+                    <GroupBox x:Name="groupBox" Header="Serial Communication" RenderTransformOrigin="-0.056,0.304" Margin="10,0,10,10" Grid.ColumnSpan="2">
+                        <Grid Margin="10" RenderTransformOrigin="-0.089,0.142">
+                            <ListBox x:Name="listBox" Margin="0,40,0,0"/>
+                            <TextBox x:Name="textBox" TextWrapping="Wrap" KeyDown="textBox_OnKeyDownHandler" Height="35" VerticalAlignment="Top"/>
+                        </Grid>
+                    </GroupBox>
+                </Grid>
+            </TabItem>
+
+        </TabControl>
+    </Grid>
+</Window>
