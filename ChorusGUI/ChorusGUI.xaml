@@ -143,48 +143,42 @@
                             <Button x:Name="IncMinimalLapTime1" Content="+" HorizontalAlignment="Left" Margin="303,103,0,0" VerticalAlignment="Top" Width="28" Click="btn_MinimalLapTime"/>
 
                             <Separator Height="12" Margin="13,128,7,0" VerticalAlignment="Top" RenderTransformOrigin="0.493,-2.983"/>
-                            <Label x:Name="label2" Content="Time to prepare for Race" HorizontalAlignment="Left" Margin="12,145,0,0" VerticalAlignment="Top"/>
-                            <Button x:Name="DecTimeToPrepare" Content="-" HorizontalAlignment="Left" Margin="183,149,0,0" VerticalAlignment="Top" Width="28" Click="btn_TimeToPrepare"/>
-                            <Label x:Name="TimeToPrepareLabel" Content="5 seconds" Margin="223,145,0,0" VerticalAlignment="Top" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Width="65"/>
-                            <Button x:Name="IncTimeToPrepare" Content="+" HorizontalAlignment="Left" Margin="303,149,0,0" VerticalAlignment="Top" Width="28" Click="btn_TimeToPrepare"/>
-
-                            <Separator Height="12" Margin="13,174,7,0" VerticalAlignment="Top" RenderTransformOrigin="0.493,-2.983"/>
-                            <CheckBox x:Name="cbSkipFirstLap" Content="Skip First Lap" HorizontalAlignment="Left" Margin="13,191,0,0" VerticalAlignment="Top" Click="SkipFirstLap_CLick" IsChecked="True"/>
-                            <ComboBox x:Name="cbElimination" HorizontalAlignment="Left" Margin="184,188,0,0" VerticalAlignment="Top" Width="147" SelectedIndex="1" SelectionChanged="cbElimination_SelectionChanged">
+                            <CheckBox x:Name="cbSkipFirstLap" Content="Skip First Lap" HorizontalAlignment="Left" Margin="13,147,0,0" VerticalAlignment="Top" Click="SkipFirstLap_CLick" IsChecked="True"/>
+                            <ComboBox x:Name="cbElimination" HorizontalAlignment="Left" Margin="184,144,0,0" VerticalAlignment="Top" Width="147" SelectedIndex="1" SelectionChanged="cbElimination_SelectionChanged">
                                 <ComboBoxItem Content="Single Out" Tag="singleout" HorizontalAlignment="Left" Width="145"/>
                                 <ComboBoxItem Content="Double Out" Tag="doubleout" HorizontalAlignment="Left" Width="145"/>
                             </ComboBox>
 
-                            <Separator Height="12" Margin="13,212,7,0" VerticalAlignment="Top" RenderTransformOrigin="0.493,-2.983"/>
-                            <Label x:Name="label3" Content="Number of Contenders for qualification run:" HorizontalAlignment="Left" Margin="10,227,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.575,-1.251"/>
-                            <TextBox x:Name="contenders1" HorizontalAlignment="Left" Height="23" Margin="277,231,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="54" IsEnabled="False" Text="1"/>
-                            <Slider x:Name="contender_slider1" Margin="13,254,7,0" VerticalAlignment="Top" TickPlacement="Both" Maximum="8" SmallChange="1" IsSnapToTickEnabled="True" Minimum="1" Value="1" Ticks="1,2,3,4,5,6,7,8" ValueChanged="contender_slider1_ValueChanged"/>
+                            <Separator Height="12" Margin="13,168,7,0" VerticalAlignment="Top" RenderTransformOrigin="0.493,-2.983"/>
+                            <Label x:Name="label3" Content="Number of Contenders for qualification run:" HorizontalAlignment="Left" Margin="10,183,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.575,-1.251"/>
+                            <TextBox x:Name="contenders1" HorizontalAlignment="Left" Height="23" Margin="277,187,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="54" IsEnabled="False" Text="1"/>
+                            <Slider x:Name="contender_slider1" Margin="13,210,7,0" VerticalAlignment="Top" TickPlacement="Both" Maximum="8" SmallChange="1" IsSnapToTickEnabled="True" Minimum="1" Value="1" Ticks="1,2,3,4,5,6,7,8" ValueChanged="contender_slider1_ValueChanged"/>
 
-                            <Separator Height="12" Margin="13,284,7,0" VerticalAlignment="Top" RenderTransformOrigin="0.493,-2.983"/>
-                            <Label x:Name="label4" Content="Qualification Races" HorizontalAlignment="Left" Margin="13,301,0,0" VerticalAlignment="Top"/>
-                            <Button x:Name="DecQualificationRuns" Content="-" HorizontalAlignment="Left" Margin="183,304,0,0" VerticalAlignment="Top" Width="28" Click="btn_QualificationRuns"/>
-                            <Label x:Name="QualificationRunsLabel" Content="3" HorizontalAlignment="Left" Margin="248,301,0,0" VerticalAlignment="Top" HorizontalContentAlignment="Center"/>
-                            <Button x:Name="IncQualificationRuns" Content="+" HorizontalAlignment="Left" Margin="303,304,0,0" VerticalAlignment="Top" Width="28" Click="btn_QualificationRuns"/>
-                            <ComboBox x:Name="cbQualificationAddResults" HorizontalAlignment="Left" Margin="370,303,0,0" VerticalAlignment="Top" Width="147" SelectedIndex="0" SelectionChanged="cbQualificationAddResults_SelectionChanged">
+                            <Separator Height="12" Margin="13,240,7,0" VerticalAlignment="Top" RenderTransformOrigin="0.493,-2.983"/>
+                            <Label x:Name="label4" Content="Qualification Races" HorizontalAlignment="Left" Margin="13,257,0,0" VerticalAlignment="Top"/>
+                            <Button x:Name="DecQualificationRuns" Content="-" HorizontalAlignment="Left" Margin="183,260,0,0" VerticalAlignment="Top" Width="28" Click="btn_QualificationRuns"/>
+                            <Label x:Name="QualificationRunsLabel" Content="3" HorizontalAlignment="Left" Margin="248,257,0,0" VerticalAlignment="Top" HorizontalContentAlignment="Center"/>
+                            <Button x:Name="IncQualificationRuns" Content="+" HorizontalAlignment="Left" Margin="303,260,0,0" VerticalAlignment="Top" Width="28" Click="btn_QualificationRuns"/>
+                            <ComboBox x:Name="cbQualificationAddResults" HorizontalAlignment="Left" Margin="370,259,0,0" VerticalAlignment="Top" Width="147" SelectedIndex="0" SelectionChanged="cbQualificationAddResults_SelectionChanged">
                                 <ComboBoxItem Content="Best out of One" Tag="bestrun" HorizontalAlignment="Left" Width="145"/>
                                 <ComboBoxItem Content="Best out of 2" Tag="bestoftwo" HorizontalAlignment="Left" Width="145"/>
                                 <ComboBoxItem Content="Best out of all" Tag="betofall" HorizontalAlignment="Left" Width="145"/>
                             </ComboBox>
 
-                            <Separator Height="12" Margin="13,329,7,0" VerticalAlignment="Top" RenderTransformOrigin="0.493,-2.983"/>
-                            <Label x:Name="label5" Content="Number of Contenders for elimination run:" HorizontalAlignment="Left" Margin="10,346,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.575,-1.251"/>
-                            <TextBox x:Name="contenders2" HorizontalAlignment="Left" Height="23" Margin="277,348,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="54" IsEnabled="False" Text="0"/>
-                            <Slider x:Name="contender_slider2" Margin="13,367,7,0" VerticalAlignment="Top" TickPlacement="Both" Maximum="8" SmallChange="1" IsSnapToTickEnabled="True" Ticks="0,2,4,6,8" ValueChanged="contender_slider2_ValueChanged"/>
+                            <Separator Height="12" Margin="13,285,7,0" VerticalAlignment="Top" RenderTransformOrigin="0.493,-2.983"/>
+                            <Label x:Name="label5" Content="Number of Contenders for elimination run:" HorizontalAlignment="Left" Margin="10,302,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.575,-1.251"/>
+                            <TextBox x:Name="contenders2" HorizontalAlignment="Left" Height="23" Margin="277,304,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="54" IsEnabled="False" Text="0"/>
+                            <Slider x:Name="contender_slider2" Margin="13,323,7,0" VerticalAlignment="Top" TickPlacement="Both" Maximum="8" SmallChange="1" IsSnapToTickEnabled="True" Ticks="0,2,4,6,8" ValueChanged="contender_slider2_ValueChanged"/>
 
-                            <Separator Height="12" Margin="13,398,7,0" VerticalAlignment="Top" RenderTransformOrigin="0.493,-2.983"/>
-                            <Label x:Name="label7" Content="Number of Contenders for Elimination Phase:" HorizontalAlignment="Left" Margin="13,415,0,0" VerticalAlignment="Top"/>
-                            <TextBox x:Name="txtContenders" HorizontalAlignment="Left" Height="23" Margin="277,417,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="54" Text="0" TextChanged="txtContenders_TextChanged"/>
+                            <Separator Height="12" Margin="13,354,7,0" VerticalAlignment="Top" RenderTransformOrigin="0.493,-2.983"/>
+                            <Label x:Name="label7" Content="Number of Contenders for Elimination Phase:" HorizontalAlignment="Left" Margin="13,371,0,0" VerticalAlignment="Top"/>
+                            <TextBox x:Name="txtContenders" HorizontalAlignment="Left" Height="23" Margin="277,373,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="54" Text="0" TextChanged="txtContenders_TextChanged"/>
                         </Grid>
                     </TabItem>
                     <TabItem Header="App Settings" FontWeight="Bold">
                         <Grid x:Name="AppSettingsGrid">
-                            
-                            
+
+
                             <ComboBox x:Name="cbSpeechVoice" HorizontalAlignment="Left" Margin="149,53,0,0" VerticalAlignment="Top" Width="385" SelectionChanged="cbSpeechVoice_SelectionChanged"/>
 
                             <CheckBox x:Name="cbEnableVoltageMonitoring" Content="Enable Voltage Monitoring for Device" HorizontalAlignment="Left" Margin="238,266,0,0" VerticalAlignment="Top" Click="VoltageMonitoring_CLick" />
@@ -214,7 +208,7 @@
 
                         </Grid>
                     </TabItem>
-                    
+
                 </TabControl>
             </TabItem>
             <TabItem Header="Debug" HorizontalAlignment="Left" Height="20" VerticalAlignment="Top" Width="54">

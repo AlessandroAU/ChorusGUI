@@ -1,8 +1,7 @@
-﻿//TODO: TEST FREQUENCY MANAGEMENT!!!
-//TODO: code weirdo racing system
-//TODO: calculate best race for pilot collection
+﻿//TODO: calculate best race for pilot collection
 //TODO: qualification choose between best run or best of all
-//TODO: race countdown
+//TODO: speak lap times
+//TODO: code weirdo racing system
 //TODO: maybe: delay pilot starts?
 //TODO: maybe: doubleclick for datagrid for information window
 //TODO: search for TODO
@@ -12,6 +11,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.IO.Ports;
 using System.Collections.ObjectModel;
+using System.Threading;
 using System.Windows.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -967,27 +967,6 @@ namespace chorusgui
             MinimalLapTimeLabel.Content = Event.MinimalLapTime + " seconds";
         }
 
-        //TIME TO PREPARE
-        private void btn_TimeToPrepare(object sender, RoutedEventArgs e)
-        {
-            Button button = (Button)sender;
-            if (button.Name[0] == 'D')
-            {
-                if (Event.TimeToPrepare > 0)
-                {
-                    Event.TimeToPrepare--;
-                }
-            }
-            else if (button.Name[0] == 'I')
-            {
-                if (Event.TimeToPrepare < 120)
-                {
-                    Event.TimeToPrepare++;
-                }
-            }
-            TimeToPrepareLabel.Content = Event.TimeToPrepare + " seconds";
-        }
-
         //SKIP FIRST LAP
         private void SkipFirstLap_CLick(object sender, RoutedEventArgs e)
         {
@@ -1465,10 +1444,16 @@ namespace chorusgui
                 Pilots_dataGrid.IsEnabled = false;
                 RaceSettingsGrid.IsEnabled = false;
                 btnRace.Content = "Stop Heat";
-                //TODO: timer to start
                 SendData("R*v");
+                Console.Beep(1000, 750);
+                System.Threading.Thread.Sleep(250);
+                Console.Beep(1000, 750);
+                System.Threading.Thread.Sleep(250);
+                Console.Beep(1000, 750);
+                System.Threading.Thread.Sleep(250);
                 SendData("R*R");
-                synthesizer.SpeakAsync("Race started");
+                new Thread(() => Console.Beep(1600,1500)).Start();
+                //TODO: allow delaying pilot start
             }
             else if (btnRace.Content.ToString() == "Stop Heat")
             {
@@ -1564,6 +1549,7 @@ namespace chorusgui
                 }
                 race.laps += lap + ":" + milliseconds + ";";
                 CalculateResults(race);
+                //TODO: speak lap time
             }
         }
 

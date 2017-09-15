@@ -10,7 +10,6 @@ namespace chorusgui
         public ChorusGUI gui;
         public String name;
         public int MinimalLapTime = 5;
-        public int TimeToPrepare = 5;
         public Boolean SkipFirstLap = true;
         public string EliminationSystem;
         public Boolean RaceMode = true;
@@ -133,10 +132,6 @@ namespace chorusgui
                         case "minimallaptime":
                             MinimalLapTime = Int32.Parse(xmlNode.InnerText);
                             gui.MinimalLapTimeLabel.Content = MinimalLapTime + " seconds";
-                            break;
-                        case "timetoprepare":
-                            TimeToPrepare = Int32.Parse(xmlNode.InnerText);
-                            gui.TimeToPrepareLabel.Content = TimeToPrepare + " seconds";
                             break;
                         case "numberofcontendersforqualification":
                             NumberOfContendersForQualification = Int32.Parse(xmlNode.InnerText);
@@ -348,11 +343,6 @@ namespace chorusgui
 
             xmlItem = xmlDoc.CreateElement("minimallaptime");
             xmlText = xmlDoc.CreateTextNode(this.MinimalLapTime.ToString());
-            xmlItem.AppendChild(xmlText);
-            rootNode.AppendChild(xmlItem);
-
-            xmlItem = xmlDoc.CreateElement("timetoprepare");
-            xmlText = xmlDoc.CreateTextNode(this.TimeToPrepare.ToString());
             xmlItem.AppendChild(xmlText);
             rootNode.AppendChild(xmlItem);
 
