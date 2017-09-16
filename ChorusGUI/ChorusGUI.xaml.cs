@@ -1,5 +1,4 @@
-﻿//BUG: causing exception coz it wants to speak laptime without being started on startup ?
-//TODO: calculate best race for pilot collection
+﻿//TODO: calculate best race for pilot collection
 //TODO: qualification choose between best run or best of all
 //TODO: code weirdo racing system
 //TODO: maybe: delay pilot starts?
@@ -103,7 +102,6 @@ namespace chorusgui
         public string BestRace { get; set; }
         public int overtime { get; set; }
         public int totallaps { get; set; }
-
     }
 
     public class _Lap
@@ -414,12 +412,7 @@ namespace chorusgui
                                 btnRace.IsEnabled = true;
                             }
                             contender_slider1.Maximum = NumberOfDevices;
-                            contender_slider2.Maximum = NumberOfDevices;
-                            int tmp = NumberOfDevices;
-                            if ((tmp % 2) == 1)
-                            {
-                                tmp--;
-                            }
+                            contender_slider2.Maximum = NumberOfDevices - (NumberOfDevices % 2);
                             ChorusDevices = new ChorusDeviceClass[NumberOfDevices];
                             for (int ii = 0; ii < NumberOfDevices; ii++)
                             {
@@ -852,6 +845,11 @@ namespace chorusgui
                                     if (ChorusDevices[device].APIVersion < 1)
                                     {
                                         MessageBox.Show("WARNING! THIS VERSION NEEDS AT LEAST API VERSION. PLEASE UPDATE YOUR CHORUS-RF VERSION", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+                                        NativeMethods.SetThreadExecutionState(m_previousExecutionState);
+                                        if (mySerialPort != null)
+                                        {
+                                            mySerialPort.Close();
+                                        }
                                         Application.Current.Shutdown();
                                     }
                                     if (device == 0)
@@ -995,7 +993,13 @@ namespace chorusgui
             {
                 if (contenders1 != null)
                 {
-                    contenders1.Text = e.NewValue.ToString();
+                    if (e.NewValue == 0)
+                    {
+                        contenders1.Text = "auto";
+                    }
+                    else {
+                        contenders1.Text = e.NewValue.ToString();
+                    }
                 }
                 if ((NumberOfDevices > 0) && ((NumberOfDevices < Event.NumberOfContendersForQualification) || (NumberOfDevices < Event.NumberOfContendersForRace)))
                 {
@@ -1041,7 +1045,13 @@ namespace chorusgui
         {
             if (contenders2 != null)
             {
-                contenders2.Text = e.NewValue.ToString();
+                if (e.NewValue == 0)
+                {
+                    contenders2.Text = "auto";
+                }
+                else {
+                    contenders2.Text = e.NewValue.ToString();
+                }
             }
             Event.NumberOfContendersForRace = Convert.ToInt32(e.NewValue);
             if ((NumberOfDevices > 0) && ((NumberOfDevices < Event.NumberOfContendersForQualification) || (NumberOfDevices < Event.NumberOfContendersForRace)))
@@ -1483,6 +1493,7 @@ namespace chorusgui
             }
             else if (btnRace.Content.ToString() == "Verify Results")
             {
+                UpdateStats();
                 Event.CurrentHeat++;
                 if (Event.CurrentHeat == (int)Math.Ceiling((double)Event.pilots.Count / Event.NumberOfContendersForQualification) * Event.QualificationRaces) {
                     tabControl1.SelectedIndex = 1; //select EliminationTab here
@@ -1547,17 +1558,6 @@ namespace chorusgui
         {
             if ((race.Device == device) && (race.Heat == Event.CurrentHeat))
             {
-                if (lap > 0)
-                {
-                    if ((milliseconds < race.BestLap) || (race.BestLap == 0))
-                    {
-                        race.BestLap = milliseconds;
-                    }
-                    if ((milliseconds < race.pilot.BestLap) || (race.pilot.BestLap == 0))
-                    {
-                        race.pilot.BestLap = milliseconds;
-                    }
-                }
                 race.laps += lap + ":" + milliseconds + ";";
                 CalculateResults(race);
                 if (settings.LapSpeaking)
@@ -1593,21 +1593,13 @@ namespace chorusgui
                     if (lapnum > 0)
                     {
                         totaltime += time;
-                        if ((time < race.BestLap) || (race.BestLap == 0))
-                        {
-                            race.BestLap = time;
-                        }
-                        if ((time < race.pilot.BestLap) || (race.pilot.BestLap == 0))
-                        {
-                            race.pilot.BestLap = time;
-                        }
                     }
                     if (Event.RaceMode)
                     {
                         //laps to finish
                         if (lapnum == Event.NumberofTimeForHeat)
                         {
-                            /*TODO BETA TEST THIS ONE*/synthesizer.SpeakAsync(race.pilot.Name + " heat complete");
+                            synthesizer.SpeakAsync(race.pilot.Name + " heat complete");
                             break;
                         }
                     }
@@ -1616,7 +1608,7 @@ namespace chorusgui
                         //time to race
                         if (totaltime >= Event.NumberofTimeForHeat * 1000)
                         {
-                            /*TODO BETA TEST THIS ONE*/synthesizer.SpeakAsync(race.pilot.Name + " heat complete");
+                            synthesizer.SpeakAsync(race.pilot.Name + " heat complete");
                             break;
                         }
                     }
@@ -1632,26 +1624,6 @@ namespace chorusgui
                         race.Result = race.Result + " DNF";
                         race.finished = false;
                     }
-                    else
-                    {
-                        if (race.pilot.BestLap > race.BestLap)
-                        {
-                            race.pilot.BestLap = race.BestLap;
-                            foreach (Pilot pilot in Event.pilots)
-                            {
-                                if (pilot.guid == race.pilot.guid)
-                                {
-                                    if (pilot.BestLap > race.BestLap)
-                                    {
-                                        pilot.BestLap = race.BestLap;
-                                    }
-                                    //TODO: check if best race for Pilot collection
-                                    break;
-                                }
-                            }
-                        }
-                        
-                    }
                 }
                 else
                 {
@@ -1663,25 +1635,6 @@ namespace chorusgui
                     {
                         race.Result = race.Result + " DNF";
                         race.finished = false;
-                    }
-                    else
-                    {
-                        if (race.pilot.BestLap > race.BestLap)
-                        {
-                            race.pilot.BestLap = race.BestLap;
-                            foreach (Pilot pilot in Event.pilots)
-                            {
-                                if (pilot.guid == race.pilot.guid)
-                                {
-                                    if (pilot.BestLap > race.BestLap)
-                                    {
-                                        pilot.BestLap = race.BestLap;
-                                    }
-                                    //TODO: check if best race for Pilot collection
-                                    break;
-                                }
-                            }
-                        }
                     }
                 }
             }
@@ -1922,17 +1875,22 @@ namespace chorusgui
 
         private void dgRace_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            //TODO
+            //TODO maybe: doubleclick for datagrid for information window
         }
 
         private void dgCurrentHeat_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            //TODO
+            //TODO maybe: doubleclick for datagrid for information window
         }
 
         private void dgPilots_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            //TODO
+            //TODO maybe: doubleclick for datagrid for information window
+        }
+
+        public void UpdateStats()
+        {
+            //TODO calculate best times for last heat since results have been verified!
         }
     }
 }

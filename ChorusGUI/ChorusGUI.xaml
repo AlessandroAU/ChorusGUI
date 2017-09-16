@@ -151,8 +151,8 @@
 
                             <Separator Height="12" Margin="13,168,7,0" VerticalAlignment="Top" RenderTransformOrigin="0.493,-2.983"/>
                             <Label x:Name="label3" Content="Number of Contenders for qualification run:" HorizontalAlignment="Left" Margin="10,183,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.575,-1.251"/>
-                            <TextBox x:Name="contenders1" HorizontalAlignment="Left" Height="23" Margin="277,187,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="54" IsEnabled="False" Text="1"/>
-                            <Slider x:Name="contender_slider1" Margin="13,210,7,0" VerticalAlignment="Top" TickPlacement="Both" Maximum="8" SmallChange="1" IsSnapToTickEnabled="True" Minimum="1" Value="1" Ticks="1,2,3,4,5,6,7,8" ValueChanged="contender_slider1_ValueChanged"/>
+                            <TextBox x:Name="contenders1" HorizontalAlignment="Left" Height="23" Margin="277,187,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="54" IsEnabled="False" Text="auto"/>
+                            <Slider x:Name="contender_slider1" Margin="13,210,7,0" VerticalAlignment="Top" TickPlacement="Both" Maximum="8" SmallChange="1" IsSnapToTickEnabled="True" ValueChanged="contender_slider1_ValueChanged"/>
 
                             <Separator Height="12" Margin="13,240,7,0" VerticalAlignment="Top" RenderTransformOrigin="0.493,-2.983"/>
                             <Label x:Name="label4" Content="Qualification Races" HorizontalAlignment="Left" Margin="13,257,0,0" VerticalAlignment="Top"/>
@@ -167,7 +167,7 @@
 
                             <Separator Height="12" Margin="13,285,7,0" VerticalAlignment="Top" RenderTransformOrigin="0.493,-2.983"/>
                             <Label x:Name="label5" Content="Number of Contenders for elimination run:" HorizontalAlignment="Left" Margin="10,302,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.575,-1.251"/>
-                            <TextBox x:Name="contenders2" HorizontalAlignment="Left" Height="23" Margin="277,304,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="54" IsEnabled="False" Text="0"/>
+                            <TextBox x:Name="contenders2" HorizontalAlignment="Left" Height="23" Margin="277,304,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="54" IsEnabled="False" Text="auto"/>
                             <Slider x:Name="contender_slider2" Margin="13,323,7,0" VerticalAlignment="Top" TickPlacement="Both" Maximum="8" SmallChange="1" IsSnapToTickEnabled="True" Ticks="0,2,4,6,8" ValueChanged="contender_slider2_ValueChanged"/>
 
                             <Separator Height="12" Margin="13,354,7,0" VerticalAlignment="Top" RenderTransformOrigin="0.493,-2.983"/>
