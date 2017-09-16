@@ -143,7 +143,7 @@
                             <Button x:Name="IncMinimalLapTime1" Content="+" HorizontalAlignment="Left" Margin="303,103,0,0" VerticalAlignment="Top" Width="28" Click="btn_MinimalLapTime"/>
 
                             <Separator Height="12" Margin="13,128,7,0" VerticalAlignment="Top" RenderTransformOrigin="0.493,-2.983"/>
-                            <CheckBox x:Name="cbSkipFirstLap" Content="Skip First Lap" HorizontalAlignment="Left" Margin="13,147,0,0" VerticalAlignment="Top" Click="SkipFirstLap_CLick" IsChecked="True"/>
+                            <CheckBox x:Name="cbSkipFirstLap" Content="Skip First Lap" HorizontalAlignment="Left" Margin="13,147,0,0" VerticalAlignment="Top" Click="SkipFirstLap_Click" IsChecked="True"/>
                             <ComboBox x:Name="cbElimination" HorizontalAlignment="Left" Margin="184,144,0,0" VerticalAlignment="Top" Width="147" SelectedIndex="1" SelectionChanged="cbElimination_SelectionChanged">
                                 <ComboBoxItem Content="Single Out" Tag="singleout" HorizontalAlignment="Left" Width="145"/>
                                 <ComboBoxItem Content="Double Out" Tag="doubleout" HorizontalAlignment="Left" Width="145"/>
@@ -178,10 +178,10 @@
                     <TabItem Header="App Settings" FontWeight="Bold">
                         <Grid x:Name="AppSettingsGrid">
 
-
+                            <CheckBox x:Name="cbEnableLapSpeaking" Content="Enable Speaking Laptimes" HorizontalAlignment="Left" Margin="238,30,0,0" VerticalAlignment="Top" Click="LapSpeaking_Click" />
                             <ComboBox x:Name="cbSpeechVoice" HorizontalAlignment="Left" Margin="149,53,0,0" VerticalAlignment="Top" Width="385" SelectionChanged="cbSpeechVoice_SelectionChanged"/>
 
-                            <CheckBox x:Name="cbEnableVoltageMonitoring" Content="Enable Voltage Monitoring for Device" HorizontalAlignment="Left" Margin="238,266,0,0" VerticalAlignment="Top" Click="VoltageMonitoring_CLick" />
+                            <CheckBox x:Name="cbEnableVoltageMonitoring" Content="Enable Voltage Monitoring for Device" HorizontalAlignment="Left" Margin="238,266,0,0" VerticalAlignment="Top" Click="VoltageMonitoring_Click" />
                             <ComboBox x:Name="cbVoltageMonitoring" HorizontalAlignment="Left" Margin="255,286,0,0" VerticalAlignment="Top" Width="204" IsEnabled="False" SelectionChanged="cbVoltageMonitoring_SelChange"/>
                             <RadioButton x:Name="radioButton1" Content="RadioButton" HorizontalAlignment="Left" Margin="426,206,0,0" VerticalAlignment="Top"/>
                             <RadioButton x:Name="radioButton2" Content="RadioButton" HorizontalAlignment="Left" Margin="167,166,0,0" VerticalAlignment="Top"/>
@@ -211,20 +211,20 @@
 
                 </TabControl>
             </TabItem>
-            <TabItem Header="Debug" HorizontalAlignment="Left" Height="20" VerticalAlignment="Top" Width="54">
-                <Grid Background="#FFE5E5E5">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="22*"/>
-                        <ColumnDefinition Width="83*"/>
-                    </Grid.ColumnDefinitions>
-                    <GroupBox x:Name="groupBox" Header="Serial Communication" RenderTransformOrigin="-0.056,0.304" Margin="10,0,10,10" Grid.ColumnSpan="2">
-                        <Grid Margin="10" RenderTransformOrigin="-0.089,0.142">
-                            <ListBox x:Name="listBox" Margin="0,40,0,0"/>
-                            <TextBox x:Name="textBox" TextWrapping="Wrap" KeyDown="textBox_OnKeyDownHandler" Height="35" VerticalAlignment="Top"/>
+            <TabItem x:Name="debugtab" Header="Debug" HorizontalAlignment="Left" Height="20" VerticalAlignment="Top" Width="54" Visibility="Hidden">
+                        <Grid Background="#FFE5E5E5">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="22*"/>
+                                <ColumnDefinition Width="83*"/>
+                            </Grid.ColumnDefinitions>
+                            <GroupBox x:Name="groupBox" Header="Serial Communication" RenderTransformOrigin="-0.056,0.304" Margin="10,0,10,10" Grid.ColumnSpan="2">
+                                <Grid Margin="10" RenderTransformOrigin="-0.089,0.142">
+                                    <ListBox x:Name="listBox" Margin="0,40,0,0"/>
+                                    <TextBox x:Name="textBox" TextWrapping="Wrap" KeyDown="textBox_OnKeyDownHandler" Height="35" VerticalAlignment="Top"/>
+                                </Grid>
+                            </GroupBox>
                         </Grid>
-                    </GroupBox>
-                </Grid>
-            </TabItem>
+                    </TabItem>
 
         </TabControl>
     </Grid>

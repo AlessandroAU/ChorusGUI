@@ -1,4 +1,5 @@
-﻿//TODO: calculate best race for pilot collection
+﻿//BUG: causing exception coz it wants to speak laptime without being started on startup ?
+//TODO: calculate best race for pilot collection
 //TODO: qualification choose between best run or best of all
 //TODO: code weirdo racing system
 //TODO: maybe: delay pilot starts?
@@ -180,6 +181,7 @@ namespace chorusgui
         public string SerialPortName { get; set; }
         public int SerialBaudIndex { get; set; }
         public Boolean VoltageMonitoring { get; set; }
+        public Boolean LapSpeaking { get; set; }
         public int VoltageMonitorDevice { get; set; }
         public string Voice { get; set; }
         public List<string> RecentFiles = new List<string>();
@@ -251,6 +253,10 @@ namespace chorusgui
                     cbSpeechVoice.SelectedIndex = 0;
                 }
                 Event.pilots.CollectionChanged += Pilots_CollectionChanged;
+                cbEnableLapSpeaking.IsChecked = settings.LapSpeaking;
+#if DEBUG
+                debugtab.Visibility = Visibility.Visible;
+#endif
             }
             catch (Exception ex)
             {
@@ -360,14 +366,15 @@ namespace chorusgui
             try
             {
                 mySerialPort.Write(outdata + "\n");
+#if DEBUG
                 listBox.Items.Add("[TX " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.ffff") + "] " + outdata);
+#endif
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString(), "FATAL ERROR - SerialPort.Write", MessageBoxButton.OK, MessageBoxImage.Error);
                 Application.Current.Shutdown();
             }
-            //TODO AUTOSCROLL???
         }
 
         //MAIN PARSER
@@ -375,8 +382,9 @@ namespace chorusgui
         {
             try
             {
+#if DEBUG
                 listBox.Items.Add("[RX " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.ffff") + "] " + readbuffer);
-                //TODO AUTOSCROLL???
+#endif
                 if ((NumberOfDevices > 0) || (readbuffer[0] == 'N'))
                 {
                     switch (readbuffer[0])
@@ -967,7 +975,7 @@ namespace chorusgui
         }
 
         //SKIP FIRST LAP
-        private void SkipFirstLap_CLick(object sender, RoutedEventArgs e)
+        private void SkipFirstLap_Click(object sender, RoutedEventArgs e)
         {
             Event.SkipFirstLap = cbSkipFirstLap.IsChecked.Value;
             if (cbSkipFirstLap.IsChecked.Value)
@@ -1054,7 +1062,12 @@ namespace chorusgui
             SendVoltageMonitorRequest("");
         }
 
-        private void VoltageMonitoring_CLick(object sender, RoutedEventArgs e)
+        private void LapSpeaking_Click(object sender, RoutedEventArgs e)
+        {
+            settings.LapSpeaking = cbEnableLapSpeaking.IsChecked.Value;
+        }
+
+        private void VoltageMonitoring_Click(object sender, RoutedEventArgs e)
         {
             settings.VoltageMonitoring = cbEnableVoltageMonitoring.IsChecked.Value;
             if (cbEnableVoltageMonitoring.IsChecked.Value)
@@ -1547,7 +1560,11 @@ namespace chorusgui
                 }
                 race.laps += lap + ":" + milliseconds + ";";
                 CalculateResults(race);
-                /*TODO BETA TEST THIS ONE*/synthesizer.SpeakAsync(race.pilot.Name + ", lap " + lap + ", "+ milliseconds + " milliseconds");
+                if (settings.LapSpeaking)
+                {
+                    /*TODO BETA TEST THIS ONE*/
+                    synthesizer.SpeakAsync(race.pilot.Name + ", lap " + lap + ", " + milliseconds + " milliseconds");
+                }
             }
         }
 
