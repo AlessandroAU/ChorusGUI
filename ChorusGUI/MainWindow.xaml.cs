@@ -22,45 +22,33 @@ namespace chorusgui
                 MessageBox.Show("NO SERIAL PORTS FOUND", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
                 Close();
             }
-
-            ////////////////
-            try {
-                ManagementObjectSearcher searcher =
-                            new ManagementObjectSearcher("root\\CIMV2",
-                            "SELECT * FROM Win32_PnPEntity");
-
-                foreach (ManagementObject queryObj in searcher.Get())
-                {
-                    if (queryObj["Caption"].ToString().Contains("(COM"))
-                    {
-                        Button newBtn = new Button();
-                        var port = queryObj["Caption"].ToString();
-                        newBtn.Content = port;
-                        newBtn.Name = port.Substring(port.IndexOf("(COM") + 1).TrimEnd(')'); ;
-                        newBtn.FontSize = 12;
-                        newBtn.Width = 320;
-                        newBtn.Click += SelectPort;
-                        sp.Children.Add(newBtn);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-
-            }
-            ////////////////
-
-            /*
             foreach (string port in ports)
             {
-                Button newBtn = new Button();
-                newBtn.Content = "Select Port: " + port;
-                newBtn.Name = port;
-                newBtn.FontSize = 20;
-                newBtn.Click += SelectPort;
-                sp.Children.Add(newBtn);
+                try
+                {
+                    //yay @ drinking beer and listening to bassdrive.com while coding w00h0000 ((.)(.))
+                    ManagementObjectSearcher searcher = new ManagementObjectSearcher("root\\CIMV2", "SELECT * FROM Win32_PnPEntity where Caption like '%"+port+"%'");
+                    ManagementObjectCollection queryCollection = searcher.Get();
+                    ManagementObject mo = queryCollection.OfType<ManagementObject>().FirstOrDefault();
+                    Button newBtn = new Button();
+                    newBtn.Name = port;
+                    newBtn.FontSize = 12;
+                    newBtn.Width = 320;
+                    if (mo == null)
+                    {
+                        newBtn.Content = port + " (Unable to detect PnPDevice)";
+                    }
+                    else
+                    {
+                        newBtn.Content = mo["Caption"].ToString();
+                    }
+                    newBtn.Click += SelectPort;
+                    sp.Children.Add(newBtn);
+                }
+                catch (Exception ex)
+                {
+                }
             }
-            */
             if ((GUI.settings.SerialBaudIndex < 0) && (GUI.settings.SerialBaudIndex > comboBox.Items.Count))
                 GUI.settings.SerialBaudIndex = 2;
             comboBox.SelectedIndex = GUI.settings.SerialBaudIndex;
