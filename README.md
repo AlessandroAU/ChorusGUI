@@ -1,6 +1,8 @@
 # ChorusGUI
 GUI Interface for Chorus RF Lap timer
 
+Keep in mind that the software still is under heavy development.
+
 ![alt text](https://github.com/anunique/ChorusGUI/blob/master/screenshoots/screenie1.jpg)
 
 ![alt text](https://github.com/anunique/ChorusGUI/blob/master/screenshoots/screenie10.jpg)
