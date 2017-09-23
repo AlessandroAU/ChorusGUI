@@ -1,5 +1,5 @@
 # ChorusGUI
-GUI Interface for Chorus RF Lap timer
+GUI Interface for Chorus RF Lap timer (get it @ https://github.com/voroshkov/Chorus-RF-Laptimer )
 
 Keep in mind that the software still is under heavy development.
 
