@@ -172,8 +172,21 @@ namespace chorusgui
                                         case "bestlap":
                                             pilot.BestLap = int.Parse(xmlPilot.InnerText);
                                             break;
-                                        case "bestrace":
-                                            pilot.BestRace = xmlPilot.InnerText;
+                                        case "overtime":
+                                            pilot.overtime = int.Parse(xmlPilot.InnerText);
+                                            break;
+                                        case "totallaps":
+                                            pilot.totallaps = int.Parse(xmlPilot.InnerText);
+                                            break;
+                                        case "firstentry":
+                                            if (xmlNode.InnerText.ToLower() == "true")
+                                            {
+                                                pilot.firstentry = true;
+                                            }
+                                            else
+                                            {
+                                                pilot.firstentry = false;
+                                            }
                                             break;
                                     }
                                 }
@@ -213,7 +226,6 @@ namespace chorusgui
                                     }
                                 }
                                 qualifications.Add(race);
-                                gui.CalculateResults(race);
                             }
                             break;
                         case "races":
@@ -258,7 +270,6 @@ namespace chorusgui
                                     }
                                 }
                                 races.Add(race);
-                                gui.CalculateResults(race);
                             }
                             break;
                     }
@@ -394,20 +405,26 @@ namespace chorusgui
                     xmlchild.AppendChild(xmlText);
                     xmlpilot.AppendChild(xmlchild);
                 }
-                if (pilot.BestLap != 0)
-                {
-                    xmlchild = xmlDoc.CreateElement("bestlap");
-                    xmlText = xmlDoc.CreateTextNode(pilot.BestLap.ToString());
-                    xmlchild.AppendChild(xmlText);
-                    xmlpilot.AppendChild(xmlchild);
-                }
-                if (pilot.BestRace != null)
-                {
-                    xmlchild = xmlDoc.CreateElement("bestrace");
-                    xmlText = xmlDoc.CreateTextNode(pilot.BestRace);
-                    xmlchild.AppendChild(xmlText);
-                    xmlpilot.AppendChild(xmlchild);
-                }
+
+                xmlchild = xmlDoc.CreateElement("bestlap");
+                xmlText = xmlDoc.CreateTextNode(pilot.BestLap.ToString());
+                xmlchild.AppendChild(xmlText);
+                xmlpilot.AppendChild(xmlchild);
+
+                xmlchild = xmlDoc.CreateElement("overtime");
+                xmlText = xmlDoc.CreateTextNode(pilot.overtime.ToString());
+                xmlchild.AppendChild(xmlText);
+                xmlpilot.AppendChild(xmlchild);
+
+                xmlchild = xmlDoc.CreateElement("totallaps");
+                xmlText = xmlDoc.CreateTextNode(pilot.totallaps.ToString());
+                xmlchild.AppendChild(xmlText);
+                xmlpilot.AppendChild(xmlchild);
+
+                xmlchild = xmlDoc.CreateElement("firstentry");
+                xmlText = xmlDoc.CreateTextNode(pilot.firstentry.ToString());
+                xmlchild.AppendChild(xmlText);
+                xmlpilot.AppendChild(xmlchild);
             }
             rootNode.AppendChild(xmlItem);
 

@@ -1,4 +1,5 @@
-﻿//TODO: calculate best race for pilot collection
+﻿//TODO: save results for races
+//TODO: save device settings in event!
 //TODO: qualification choose between best run or best of all
 //TODO: code weirdo racing system
 //TODO: maybe: delay pilot starts?
@@ -51,7 +52,7 @@ namespace chorusgui
     public class HeatCollection : ObservableCollection<Race>
     {
     }
- 
+
     public class ChorusDeviceClass
     {
         public ComboBox Frequency;
@@ -87,7 +88,8 @@ namespace chorusgui
             {
                 if (_guid == null)
                 {
-                    _guid = Convert.ToBase64String(Guid.NewGuid().ToByteArray()).Substring(0, 22).Replace('+', '-').Replace('/', '_'); ;
+                    _guid = Convert.ToBase64String(Guid.NewGuid().ToByteArray()).Substring(0, 22).Replace('+', '-').Replace('/', '_');
+                    firstentry = false;
                 }
                 return _guid;
             }
@@ -99,9 +101,25 @@ namespace chorusgui
         public string Ranking { get; set; }
         public string Name { get; set; }
         public int BestLap { get; set; }
-        public string BestRace { get; set; }
         public int overtime { get; set; }
         public int totallaps { get; set; }
+        public Boolean firstentry { get; set; }
+        public string BestRace
+        {
+            get
+            {
+                if (totallaps == -1)
+                {
+                    return overtime.ToString() + " ms"; //TODO PRETTYFY ME
+                }
+                else
+                {
+                    return totallaps.ToString() + " laps " + overtime.ToString() + " ms"; //TODO PRETTYFY ME
+                }
+            }
+            set { /*not needed*/ }
+        }
+
     }
 
     public class _Lap
@@ -169,7 +187,35 @@ namespace chorusgui
                 lap = value;
             }
         }
-        public string Result { get; set; }
+        public string Result
+        {
+            get
+            {
+                if (totallaps == -1)
+                {
+                    if (finished)
+                    {
+                        return overtime.ToString() + " ms"; //TODO PRETTYFY ME
+                    }
+                    else
+                    {
+                        return overtime.ToString() + " ms DNF"; //TODO PRETTYFY ME
+                    }
+                }
+                else
+                {
+                    if (finished)
+                    {
+                        return totallaps.ToString() + " laps " + overtime.ToString() + " ms"; //TODO PRETTYFY ME
+                    }
+                    else
+                    {
+                        return totallaps.ToString() + " laps " + overtime.ToString() + " ms DNF"; //TODO PRETTYFY ME
+                    }
+                }
+            }
+            set { /*not needed*/ }
+        }
     }
 
     [Serializable]
@@ -213,7 +259,8 @@ namespace chorusgui
             {
                 MessageBox.Show("Call to SetThreadExecutionState failed unexpectedly.", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            try {
+            try
+            {
                 Event = new EventClass();
                 Event.gui = this;
                 InitializeComponent();
@@ -232,7 +279,7 @@ namespace chorusgui
                     UpdateRecentFileList("");
                     Event.LoadEvent(settings.RecentFiles[0]);
                 }
-                Title = "Chorus Lap Timer @ " + settings.SerialPortName + "(" + settings.SerialBaud + " Baud) -=] " + Event.name + " [=-"; 
+                Title = "Chorus Lap Timer @ " + settings.SerialPortName + "(" + settings.SerialBaud + " Baud) -=] " + Event.name + " [=-";
                 aTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
                 VoltageMonitorTimer.Elapsed += new ElapsedEventHandler(VoltageMonitorTimerEvent);
                 QualificationRunsLabel.Content = Event.QualificationRaces;
@@ -330,7 +377,7 @@ namespace chorusgui
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), "FATAL ERROR - SerialPort.Open", MessageBoxButton.OK,MessageBoxImage.Error);
+                MessageBox.Show(ex.ToString(), "FATAL ERROR - SerialPort.Open", MessageBoxButton.OK, MessageBoxImage.Error);
                 Application.Current.Shutdown();
             }
             SendData("N0");
@@ -529,7 +576,7 @@ namespace chorusgui
                                 combobox.HorizontalAlignment = HorizontalAlignment.Left;
                                 combobox.VerticalAlignment = VerticalAlignment.Top;
                                 combobox.SelectedIndex = 0;
-                                combobox.Name = "ID"+ii+"F";
+                                combobox.Name = "ID" + ii + "F";
                                 combobox.Tag = ii;
                                 combobox.Margin = new Thickness(80, 90, 10, 0);
                                 combobox.Height = 20;
@@ -906,7 +953,7 @@ namespace chorusgui
                 settings.SerialBaudIndex = 2;
             }
         }
-        
+
         private void Settings_TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             TabControl tabcontrol = (TabControl)sender;
@@ -918,7 +965,7 @@ namespace chorusgui
                 }
             }
         }
-        
+
         #region Settings_Race
         //RACEMODE
         void RaceMode_Checked(object sender, RoutedEventArgs e)
@@ -1304,7 +1351,7 @@ namespace chorusgui
             RaceSettingsGrid.IsEnabled = true;
             btnRace.Content = "Start Heat";
             UpdateHeatTable();
-            UpdateRecentFileList("newevent-"+ ((Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds).ToString("X") +".xml");
+            UpdateRecentFileList("newevent-" + ((Int32)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds).ToString("X") + ".xml");
         }
 
         private void txtEventName_TextChanged(object sender, TextChangedEventArgs e)
@@ -1473,7 +1520,7 @@ namespace chorusgui
                 Console.Beep(1000, 750);
                 System.Threading.Thread.Sleep(250);
                 SendData("R*R");
-                new Thread(() => Console.Beep(1600,1500)).Start();
+                new Thread(() => Console.Beep(1600, 1500)).Start();
                 //TODO: allow delaying pilot start
             }
             else if (btnRace.Content.ToString() == "Stop Heat")
@@ -1483,7 +1530,7 @@ namespace chorusgui
                 synthesizer.SpeakAsync("Heat finished");
                 foreach (Race race in Heat)
                 {
-                    if (race.laps==null)
+                    if (race.laps == null)
                     {
                         race.laps = "";
                     }
@@ -1495,7 +1542,8 @@ namespace chorusgui
             {
                 UpdateStats();
                 Event.CurrentHeat++;
-                if (Event.CurrentHeat == (int)Math.Ceiling((double)Event.pilots.Count / Event.NumberOfContendersForQualification) * Event.QualificationRaces) {
+                if (Event.CurrentHeat == (int)Math.Ceiling((double)Event.pilots.Count / Event.NumberOfContendersForQualification) * Event.QualificationRaces)
+                {
                     tabControl1.SelectedIndex = 1; //select EliminationTab here
                     UpdateEliminationTable(true);
                 }
@@ -1577,6 +1625,8 @@ namespace chorusgui
             {
                 string[] laps = race.laps.Split(';');
                 int pos;
+                int timefix = 0;
+                race.BestLap = 0;
                 foreach (string lap in laps)
                 {
                     pos = lap.IndexOf(":");
@@ -1589,10 +1639,16 @@ namespace chorusgui
                     if ((lapnum == 0) && (!Event.SkipFirstLap))
                     {
                         totaltime += time;
+                        timefix = time;
                     }
                     if (lapnum > 0)
                     {
-                        totaltime += time;
+                        totaltime += time + timefix;
+                        if ((time < race.BestLap) || (race.BestLap == 0))
+                        {
+                            race.BestLap = time;
+                        }
+                        timefix = 0;
                     }
                     if (Event.RaceMode)
                     {
@@ -1617,23 +1673,22 @@ namespace chorusgui
                 if (Event.RaceMode)
                 {
                     //laps to finish
-                    race.Result = "ms: " + totaltime;
                     race.overtime = totaltime;
                     if (lapnum < Event.NumberofTimeForHeat)
                     {
-                        race.Result = race.Result + " DNF";
                         race.finished = false;
                     }
+                    race.totallaps = -1;
                 }
                 else
                 {
                     //time to race
-                    race.Result = "Laps: " + (lapnum - 1) + " Overtime: " + time;
                     race.totallaps = lapnum - 1;
-                    race.overtime = time;
+                    if (race.totallaps < 0)
+                        race.totallaps = 0;
+                    race.overtime = totaltime - (Event.NumberofTimeForHeat * 1000);
                     if (totaltime < Event.NumberofTimeForHeat * 1000)
                     {
-                        race.Result = race.Result + " DNF";
                         race.finished = false;
                     }
                 }
@@ -1655,7 +1710,7 @@ namespace chorusgui
                             ContextMenu contextMenu1 = new ContextMenu();
                             MenuItem menuItem1 = new MenuItem();
                             menuItem1.Header = "Delete Lap";
-                            menuItem1.Tag = new { lap=lap, race=race };
+                            menuItem1.Tag = new { lap = lap, race = race };
                             menuItem1.Click += IDM_DELETELAP;
                             contextMenu1.Items.Add(menuItem1);
                             dgCurrentHeat.ContextMenu = contextMenu1;
@@ -1669,15 +1724,15 @@ namespace chorusgui
 
         private void IDM_DELETELAP(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show("Do you really want to delete this lap?", "Delete Lap", MessageBoxButton.YesNo,MessageBoxImage.Question) == MessageBoxResult.Yes)
+            if (MessageBox.Show("Do you really want to delete this lap?", "Delete Lap", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
             {
                 MenuItem menuItem1 = sender as MenuItem;
                 object o = menuItem1.Tag;
                 int lapnum = (int)o?.GetType().GetProperty("lap")?.GetValue(o, null);
                 Race race = (Race)o?.GetType().GetProperty("race")?.GetValue(o, null);
                 string[] laps = race.laps.Split(';');
-                int newlap=0;
-                int newtime=0;
+                int newlap = 0;
+                int newtime = 0;
                 race.laps = "";
                 foreach (string lap in laps)
                 {
@@ -1857,7 +1912,7 @@ namespace chorusgui
 
         #endregion
 
-        void txt_RssiTreshold_TextChanged(object sender, TextChangedEventArgs e) 
+        void txt_RssiTreshold_TextChanged(object sender, TextChangedEventArgs e)
         {
             int value;
             TextBox textbox = (TextBox)sender;
@@ -1888,9 +1943,79 @@ namespace chorusgui
             //TODO maybe: doubleclick for datagrid for information window
         }
 
-        public void UpdateStats()
+        public void UpdateStats() //isnt it ugly? hehe
         {
-            //TODO calculate best times for last heat since results have been verified!
+            if (Event.CurrentHeat >= (int)Math.Ceiling((double)Event.pilots.Count / Event.NumberOfContendersForQualification) * Event.QualificationRaces)
+            {
+                foreach (Race race in Event.races)
+                {
+                    UpdateRaceEntry(race);
+                }
+            }
+            else
+            {
+                foreach (Race race in Event.qualifications)
+                {
+                    UpdateRaceEntry(race);
+                }
+            }
+            var bleh4 = Pilots_dataGrid.ItemsSource;
+            Pilots_dataGrid.ItemsSource = null;
+            Pilots_dataGrid.ItemsSource = bleh4;
         }
+
+        public void UpdateRaceEntry(Race race)
+        {
+            if (race.Heat == Event.CurrentHeat)
+            {
+                foreach (Pilot pilot in Event.pilots)
+                {
+                    if (pilot.guid == race.pilot.guid)
+                    {
+                        if (pilot.firstentry == false)
+                        {
+                            pilot.BestLap = race.BestLap;
+                            pilot.totallaps = race.totallaps;
+                            pilot.overtime = race.overtime;
+                            pilot.firstentry = true;
+                        }
+                        else {
+
+                            if (pilot.BestLap > race.BestLap)
+                            {
+                                pilot.BestLap = race.BestLap;
+                            }
+                            if (race.finished)
+                            {
+                                if (race.totallaps == -1)
+                                {
+                                    if (pilot.overtime > race.overtime)
+                                    {
+                                        pilot.overtime = race.overtime;
+                                    }
+                                }
+                                else
+                                {
+                                    if (pilot.totallaps == race.totallaps)
+                                    {
+                                        if (pilot.overtime > race.overtime)
+                                        {
+                                            pilot.overtime = race.overtime;
+                                        }
+                                    }
+                                    if (pilot.totallaps < race.totallaps)
+                                    {
+                                        pilot.totallaps = race.totallaps;
+                                        pilot.overtime = race.overtime;
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
     }
 }
