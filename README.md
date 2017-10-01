@@ -4,8 +4,8 @@ GUI Interface for Chorus RF Lap timer (get it @ https://github.com/voroshkov/Cho
 Keep in mind that the software still is under heavy development.
 
 <pre>
-//TODO: save results for races
-//TODO: save device settings in event!
+//TODO: BETATEST: save results for races
+//TODO: update app device settings according to saved settings in event class!
 //TODO: qualification choose between best run or best of all
 //TODO: code weirdo racing system
 //TODO: maybe: delay pilot starts?

@@ -5,6 +5,12 @@ using System.Windows;
 
 namespace chorusgui
 {
+    public class ChorusDeviceSettings
+    {
+        public int Frequency;
+        public int CurrentThreshold;
+    }
+
     public partial class EventClass
     {
         public ChorusGUI gui;
@@ -26,6 +32,7 @@ namespace chorusgui
         public QualificationCollection qualifications;
         public RaceCollection races;
         public Boolean IsRaceComplete = false;
+        public ChorusDeviceSettings[] ChorusDeviceSettings;
 
         public EventClass()
         {
@@ -223,6 +230,25 @@ namespace chorusgui
                                         case "laps":
                                             race.laps = xmlRace.InnerText;
                                             break;
+                                        case "bestlap":
+                                            race.BestLap = int.Parse(xmlRace.InnerText);
+                                            break;
+                                        case "overtime":
+                                            race.overtime = int.Parse(xmlRace.InnerText);
+                                            break;
+                                        case "totallaps":
+                                            race.totallaps = int.Parse(xmlRace.InnerText);
+                                            break;
+                                        case "finished":
+                                            if (xmlNode.InnerText.ToLower() == "true")
+                                            {
+                                                race.finished = true;
+                                            }
+                                            else
+                                            {
+                                                race.finished = false;
+                                            }
+                                            break;
                                     }
                                 }
                                 qualifications.Add(race);
@@ -255,7 +281,7 @@ namespace chorusgui
                                             }
                                             if (race.pilot == null)
                                             {
-                                                //TODO: WTF???
+                                                //WTF???
                                             }
                                             break;
                                         case "heat":
@@ -267,9 +293,54 @@ namespace chorusgui
                                         case "laps":
                                             race.laps = xmlRace.InnerText;
                                             break;
+                                        case "bestlap":
+                                            race.BestLap = int.Parse(xmlRace.InnerText);
+                                            break;
+                                        case "overtime":
+                                            race.overtime = int.Parse(xmlRace.InnerText);
+                                            break;
+                                        case "totallaps":
+                                            race.totallaps = int.Parse(xmlRace.InnerText);
+                                            break;
+                                        case "finished":
+                                            if (xmlNode.InnerText.ToLower() == "true")
+                                            {
+                                                race.finished = true;
+                                            }
+                                            else
+                                            {
+                                                race.finished = false;
+                                            }
+                                            break;
                                     }
                                 }
                                 races.Add(race);
+                            }
+                            break;
+                        case "devices":
+                            int devicecount = xmlNode.SelectNodes("device").Count;
+                            if (devicecount == 0)
+                            {
+                                break;
+                            }
+                            ChorusDeviceSettings = new ChorusDeviceSettings[devicecount];
+                            int i = 0;
+                            foreach (XmlNode xmlDevices in xmlNode)
+                            {
+                                ChorusDeviceSettings[i] = new ChorusDeviceSettings();
+                                foreach (XmlNode xmlDevice in xmlDevices)
+                                {
+                                    switch (xmlDevice.Name.ToLower())
+                                    {
+                                        case "rssithreshold":
+                                            ChorusDeviceSettings[i].CurrentThreshold = Int32.Parse(xmlDevice.InnerText);
+                                            break;
+                                        case "frequency":
+                                            ChorusDeviceSettings[i].Frequency = Int32.Parse(xmlDevice.InnerText);
+                                            break;
+                                    }
+                                }
+                                i++;
                             }
                             break;
                     }
@@ -456,6 +527,26 @@ namespace chorusgui
                     xmlchild.AppendChild(xmlText);
                     xmlrace.AppendChild(xmlchild);
                 }
+
+                xmlchild = xmlDoc.CreateElement("bestlap");
+                xmlText = xmlDoc.CreateTextNode(race.BestLap.ToString());
+                xmlchild.AppendChild(xmlText);
+                xmlrace.AppendChild(xmlchild);
+
+                xmlchild = xmlDoc.CreateElement("overtime");
+                xmlText = xmlDoc.CreateTextNode(race.overtime.ToString());
+                xmlchild.AppendChild(xmlText);
+                xmlrace.AppendChild(xmlchild);
+
+                xmlchild = xmlDoc.CreateElement("totallaps");
+                xmlText = xmlDoc.CreateTextNode(race.totallaps.ToString());
+                xmlchild.AppendChild(xmlText);
+                xmlrace.AppendChild(xmlchild);
+
+                xmlchild = xmlDoc.CreateElement("finished");
+                xmlText = xmlDoc.CreateTextNode(race.finished.ToString());
+                xmlchild.AppendChild(xmlText);
+                xmlrace.AppendChild(xmlchild);
             }
             rootNode.AppendChild(xmlItem);
 
@@ -488,8 +579,58 @@ namespace chorusgui
                     xmlrace.AppendChild(xmlchild);
                 }
 
+                xmlchild = xmlDoc.CreateElement("bestlap");
+                xmlText = xmlDoc.CreateTextNode(race.BestLap.ToString());
+                xmlchild.AppendChild(xmlText);
+                xmlrace.AppendChild(xmlchild);
+
+                xmlchild = xmlDoc.CreateElement("overtime");
+                xmlText = xmlDoc.CreateTextNode(race.overtime.ToString());
+                xmlchild.AppendChild(xmlText);
+                xmlrace.AppendChild(xmlchild);
+
+                xmlchild = xmlDoc.CreateElement("totallaps");
+                xmlText = xmlDoc.CreateTextNode(race.totallaps.ToString());
+                xmlchild.AppendChild(xmlText);
+                xmlrace.AppendChild(xmlchild);
+
+                xmlchild = xmlDoc.CreateElement("finished");
+                xmlText = xmlDoc.CreateTextNode(race.finished.ToString());
+                xmlchild.AppendChild(xmlText);
+                xmlrace.AppendChild(xmlchild);
             }
+
             rootNode.AppendChild(xmlItem);
+
+            if ((gui.ChorusDevices != null) && (gui.ChorusDevices.Length > 0))
+            {
+                xmlItem = xmlDoc.CreateElement("devices");
+                for (int i = 0; i < gui.ChorusDevices.Length; i++)
+                {
+                    XmlNode xmlDevice = xmlDoc.CreateElement("device");
+
+                    XmlNode xmlchild = xmlDoc.CreateElement("rssithreshold");
+                    xmlText = xmlDoc.CreateTextNode(gui.ChorusDevices[i].CurrentThreshold.ToString());
+                    xmlchild.AppendChild(xmlText);
+                    xmlDevice.AppendChild(xmlchild);
+
+                    xmlchild = xmlDoc.CreateElement("frequency");
+                    ComboBoxItem cbitem = (ComboBoxItem)gui.ChorusDevices[i].Frequency.SelectedItem;
+                    if (cbitem != null)
+                    {
+                        xmlText = xmlDoc.CreateTextNode(cbitem.Tag.ToString());
+                    }
+                    else
+                    {
+                        xmlText = xmlDoc.CreateTextNode("5658");
+                    }
+                    xmlchild.AppendChild(xmlText);
+                    xmlDevice.AppendChild(xmlchild);
+
+                    xmlItem.AppendChild(xmlDevice);
+                }
+                rootNode.AppendChild(xmlItem);
+            }
             xmlDoc.Save(filename);
             gui.UpdateRecentFileList(filename);
             return true;

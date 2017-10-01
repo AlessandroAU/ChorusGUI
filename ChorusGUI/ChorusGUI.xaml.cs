@@ -1,5 +1,5 @@
-﻿//TODO: save results for races
-//TODO: save device settings in event!
+﻿//TODO: BETATEST: save results for races
+//TODO: update app device settings according to saved settings in event class!
 //TODO: qualification choose between best run or best of all
 //TODO: code weirdo racing system
 //TODO: maybe: delay pilot starts?
@@ -67,8 +67,8 @@ namespace chorusgui
         public CheckBox RaceActive;
         public int CurrentRSSIValue;
         public Label CurrentRSSIValueLabel;
-        public int CurrentTreshold;
-        public TextBox CurrentTresholdTextBox;
+        public int CurrentThreshold;
+        public TextBox CurrentThresholdTextBox;
         public CheckBox RSSIMonitoringActive;
         public ListView LapTimes;
         public double CurrentVoltage;
@@ -246,7 +246,7 @@ namespace chorusgui
         private HeatCollection Heat;
         public Settings settings = new Settings();
 
-        ChorusDeviceClass[] ChorusDevices;
+        public ChorusDeviceClass[] ChorusDevices;
 
         #region WINDOW
 
@@ -582,6 +582,7 @@ namespace chorusgui
                                 combobox.Height = 20;
                                 combobox.Width = 330;
                                 combobox.IsEditable = true;
+                                //TODO: check event class for saved settings!!
                                 switch (ii)
                                 {
                                     default:
@@ -632,11 +633,12 @@ namespace chorusgui
                                 ChorusDevices[ii].CurrentRSSIValueLabel = label;
 
                                 label = new Label();
-                                label.Content = "Current RSSI Treshold:";
+                                label.Content = "Current RSSI Threshold:";
                                 label.Name = "ID" + ii + "T";
                                 label.Margin = new Thickness(10, 132, 0, 0);
                                 grid.Children.Add(label);
 
+                                //TODO: check event class for saved settings!!
                                 TextBox textbox = new TextBox();
                                 textbox.Name = "ID" + ii + "Tb";
                                 textbox.Margin = new Thickness(135, 135, 0, 0);
@@ -646,9 +648,9 @@ namespace chorusgui
                                 textbox.MaxLines = 1;
                                 textbox.Height = 20;
                                 textbox.Width = 60;
-                                textbox.TextChanged += txt_RssiTreshold_TextChanged;
+                                textbox.TextChanged += txt_RssiThreshold_TextChanged;
                                 grid.Children.Add(textbox);
-                                ChorusDevices[ii].CurrentTresholdTextBox = textbox;
+                                ChorusDevices[ii].CurrentThresholdTextBox = textbox;
 
                                 Button button = new Button();
                                 button.Name = "ID" + ii + "Td";
@@ -858,8 +860,8 @@ namespace chorusgui
                                     ChorusDevices[device].CurrentRSSIValueLabel.Content = "RSSI Value: " + ChorusDevices[device].CurrentRSSIValue;
                                     break;
                                 case 'T': //Current Threshold (2 bytes)
-                                    ChorusDevices[device].CurrentTreshold = int.Parse(readbuffer.Substring(3), System.Globalization.NumberStyles.HexNumber);
-                                    ChorusDevices[device].CurrentTresholdTextBox.Text = ChorusDevices[device].CurrentTreshold.ToString(); ;
+                                    ChorusDevices[device].CurrentThreshold = int.Parse(readbuffer.Substring(3), System.Globalization.NumberStyles.HexNumber);
+                                    ChorusDevices[device].CurrentThresholdTextBox.Text = ChorusDevices[device].CurrentThreshold.ToString(); ;
                                     break;
                                 case 'V': //RSSI Monitor State (half-byte; 1 = On, 0 = Off)
                                     if (readbuffer[3] == '0')
@@ -1912,7 +1914,7 @@ namespace chorusgui
 
         #endregion
 
-        void txt_RssiTreshold_TextChanged(object sender, TextChangedEventArgs e)
+        void txt_RssiThreshold_TextChanged(object sender, TextChangedEventArgs e)
         {
             int value;
             TextBox textbox = (TextBox)sender;
